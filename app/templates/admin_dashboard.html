@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard{% endblock %}
+{% block content %}
+<h2>Add New Course</h2>
+<form method="POST">
+    {{ form.hidden_tag() }}
+
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            {{ form.course_code.label }} {{ form.course_code(class="form-control") }}
+        </div>
+        <div class="col-md-4 mb-3">
+            {{ form.course_name.label }} {{ form.course_name(class="form-control") }}
+        </div>
+        <div class="col-md-4 mb-3">
+            {{ form.instructor.label }} {{ form.instructor(class="form-control") }}
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-3 mb-3">
+            {{ form.quota.label }} {{ form.quota(class="form-control") }}
+        </div>
+        <div class="col-md-3 mb-3">
+            {{ form.credits.label }} {{ form.credits(class="form-control") }}
+        </div>
+        <div class="col-md-3 mb-3">
+            {{ form.semester.label }} {{ form.semester(class="form-control") }}
+        </div>
+        <div class="col-md-3 mb-3">
+            {{ form.schedule.label }} {{ form.schedule(class="form-control") }}
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            {{ form.location.label }} {{ form.location(class="form-control") }}
+        </div>
+        <div class="col-md-6 mb-3">
+            {{ form.description.label }} {{ form.description(class="form-control", rows="3") }}
+        </div>
+    </div>
+
+    <div class="mt-2">
+        {{ form.submit(class="btn btn-success") }}
+    </div>
+</form>
+
+<hr>
+<h3>All Courses</h3>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Code</th>
+            <th>Name</th>
+            <th>Instructor</th>
+            <th>Credits</th>
+            <th>Semester</th>
+            <th>Quota</th>
+            <th>Location</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for c in courses %}
+        <tr>
+            <td>{{ c.course_code }}</td>
+            <td>{{ c.course_name }}</td>
+            <td>{{ c.instructor }}</td>
+            <td>{{ c.credits }}</td>
+            <td>{{ c.semester }}</td>
+            <td>{{ c.quota }}</td>
+            <td>{{ c.location }}</td>
+            <td>
+                <a href="{{ url_for('main.admin_edit', course_id=c.id) }}" class="btn btn-sm btn-outline-primary">Edit</a>
+
+                <a href="{{ url_for('main.admin_delete', course_id=c.id) }}" class="btn btn-sm btn-outline-danger">Delete</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<h2>Available Courses</h2>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Code</th>
+            <th>Name</th>
+            <th>Instructor</th>
+            <th>Quota</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for course in courses %}
+        <tr>
+            <td>{{ course.course_code }}</td>
+            <td>{{ course.course_name }}</td>
+            <td>{{ course.instructor }}</td>
+            <td>{{ course.credits }}</td>
+            <td>{{ course.schedule }}</td>
+            <td>{{ course.location }}</td>
+            <td>{{ course.description }}</td>
+            <td>
+                {% if course.id in enrolled_ids %}
+                    <a href="{{ url_for('main.drop', course_id=course.id) }}" class="btn btn-sm btn-outline-danger">Drop</a>
+                {% else %}
+                    <a href="{{ url_for('main.enroll', course_id=course.id) }}" class="btn btn-sm btn-success">Enroll</a>
+                {% endif %}
+            </td>
+        </tr>
+        
+        {% endfor %}
+    </tbody>
+</table>
+<a href="{{ url_for('main.my_courses') }}" class="btn btn-outline-primary">View My Courses</a>
+{% endblock %}
