@@ -33,11 +33,26 @@
     </div>
 
     <div class="row">
-        <div class="col-md-6 mb-3">
+        <div class="col-md-4 mb-3">
             {{ form.location.label }} {{ form.location(class="form-control") }}
         </div>
-        <div class="col-md-6 mb-3">
-            {{ form.description.label }} {{ form.description(class="form-control", rows="3") }}
+        <div class="col-md-4 mb-3">
+            {{ form.department.label }} {{ form.department(class="form-select") }}
+        </div>
+        <div class="col-md-4 mb-3">
+            {{ form.day_of_week.label }} {{ form.day_of_week(class="form-select") }}
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            {{ form.start_time.label }} {{ form.start_time(class="form-control") }}
+        </div>
+        <div class="col-md-4 mb-3">
+            {{ form.end_time.label }} {{ form.end_time(class="form-control") }}
+        </div>
+        <div class="col-md-4 mb-3">
+            {{ form.description.label }} {{ form.description(class="form-control", rows=2) }}
         </div>
     </div>
 
@@ -53,11 +68,11 @@
         <tr>
             <th>Code</th>
             <th>Name</th>
+            <th>Dept</th>
+            <th>Day</th>
+            <th>Time</th>
             <th>Instructor</th>
-            <th>Credits</th>
-            <th>Semester</th>
             <th>Quota</th>
-            <th>Location</th>
             <th>Action</th>
         </tr>
     </thead>
@@ -66,16 +81,22 @@
         <tr>
             <td>{{ c.course_code }}</td>
             <td>{{ c.course_name }}</td>
+            <td>{{ c.department }}</td>
+            <td>{{ c.day_of_week }}</td>
+            <td>
+                {% if c.start_time and c.end_time %}
+                  {{ c.start_time.strftime('%H:%M') }} - {{ c.end_time.strftime('%H:%M') }}
+                {% else %}
+                  <span class="text-muted">No time set</span>
+                {% endif %}
+              </td>
             <td>{{ c.instructor }}</td>
-            <td>{{ c.credits }}</td>
-            <td>{{ c.semester }}</td>
             <td>{{ c.quota }}</td>
-            <td>{{ c.location }}</td>
             <td>
                 <a href="{{ url_for('main.admin_edit', course_id=c.id) }}" class="btn btn-sm btn-outline-primary">Edit</a>
-
                 <a href="{{ url_for('main.admin_delete', course_id=c.id) }}" class="btn btn-sm btn-outline-danger">Delete</a>
-            </td>
+                <a href="{{ url_for('main.admin_view_students', course_id=c.id) }}" class="btn btn-sm btn-outline-info">View Students</a>
+            </td>            
         </tr>
         {% endfor %}
     </tbody>

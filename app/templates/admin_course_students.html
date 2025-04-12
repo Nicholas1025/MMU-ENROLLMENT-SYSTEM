@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Students in {{ course.course_code }}{% endblock %}
+{% block content %}
+<h2>Students Enrolled in {{ course.course_code }} - {{ course.course_name }}</h2>
+
+{% if students %}
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Department</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for s in students %}
+        <tr>
+            <td>{{ s.name }}</td>
+            <td>{{ s.email }}</td>
+            <td>{{ s.department }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p class="text-muted">No students enrolled in this course yet.</p>
+{% endif %}
+
+<a href="{{ url_for('main.admin_dashboard') }}" class="btn btn-secondary mt-3">Back to Dashboard</a>
+{% endblock %}

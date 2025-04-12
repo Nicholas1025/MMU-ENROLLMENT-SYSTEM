@@ -1,13 +1,16 @@
 {% extends "base.html" %}
 {% block title %}Dashboard{% endblock %}
 {% block content %}
-<h2>Available Courses</h2>
+<h2>Available Courses ({{ courses|length }})</h2>
 <table class="table table-bordered">
-    <thead>
+    <thead class="table-light">
         <tr>
             <th>Code</th>
             <th>Name</th>
+            <th>Day</th>
+            <th>Time</th>
             <th>Instructor</th>
+            <th>Department</th>
             <th>Quota</th>
             <th>Action</th>
         </tr>
@@ -17,11 +20,21 @@
         <tr>
             <td>{{ course.course_code }}</td>
             <td>{{ course.course_name }}</td>
+            <td>{{ course.day_of_week }}</td>
+            <td>
+                {% if course.start_time and course.end_time %}
+                  {{ course.start_time.strftime('%H:%M') }} - {{ course.end_time.strftime('%H:%M') }}
+                {% else %}
+                  <span class="text-muted">No time set</span>
+                {% endif %}
+              </td>
+              
             <td>{{ course.instructor }}</td>
-            <td>{{ course.credits }}</td>
-            <td>{{ course.schedule }}</td>
-            <td>{{ course.location }}</td>
-            <td>{{ course.description }}</td>
+            <td>{{ course.department }}</td>
+            <td>
+                {% set enrolled = course.enrollments|length %}
+                {{ enrolled }}/{{ course.quota }}
+            </td>
             <td>
                 {% if course.id in enrolled_ids %}
                     <a href="{{ url_for('main.drop', course_id=course.id) }}" class="btn btn-sm btn-outline-danger">Drop</a>
@@ -30,9 +43,11 @@
                 {% endif %}
             </td>
         </tr>
-        
         {% endfor %}
     </tbody>
 </table>
-<a href="{{ url_for('main.my_courses') }}" class="btn btn-outline-primary">View My Courses</a>
+
+<a href="{{ url_for('main.my_courses') }}" class="btn btn-outline-primary mt-3">View My Courses</a>
+<a href="{{ url_for('main.timetable') }}" class="btn btn-outline-info mt-3">View My Timetable</a>
+
 {% endblock %}

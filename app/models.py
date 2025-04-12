@@ -7,6 +7,7 @@ class Student(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64))
     email = db.Column(db.String(120), unique=True)
+    department = db.Column(db.String(64))
     password_hash = db.Column(db.String(128))
 
     enrollments = db.relationship('Enrollment', backref='student', lazy=True)
@@ -39,6 +40,10 @@ class Course(db.Model):
     semester = db.Column(db.String(64))
     schedule = db.Column(db.String(128))
     location = db.Column(db.String(128))
+    department = db.Column(db.String(64))
+    day_of_week = db.Column(db.String(16))
+    start_time = db.Column(db.Time)
+    end_time = db.Column(db.Time)
 
     enrollments = db.relationship('Enrollment', backref='course', lazy=True)
 

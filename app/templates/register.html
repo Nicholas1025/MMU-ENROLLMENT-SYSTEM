@@ -4,6 +4,7 @@
 <h2>Student Registration</h2>
 <form method="POST">
     {{ form.hidden_tag() }}
+
     <div class="mb-3">
         {{ form.name.label(class="form-label") }}
         {{ form.name(class="form-control") }}
@@ -19,6 +20,10 @@
     <div class="mb-3">
         {{ form.confirm.label(class="form-label") }}
         {{ form.confirm(class="form-control") }}
+    </div>
+    <div class="mb-3">
+        {{ form.department.label(class="form-label") }}
+        {{ form.department(class="form-select") }}
     </div>
     <div class="mb-3">
         {{ form.submit(class="btn btn-primary") }}

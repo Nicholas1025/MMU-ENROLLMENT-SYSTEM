@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}My Timetable{% endblock %}
+{% block content %}
+<h2>My Weekly Timetable</h2>
+
+<style>
+    table.timetable {
+        table-layout: fixed;
+        width: 100%;
+        text-align: center;
+        border-collapse: collapse;
+    }
+    table.timetable th, table.timetable td {
+        border: 1px solid #ccc;
+        padding: 8px;
+        vertical-align: top;
+        height: 80px;
+    }
+    .course-block {
+        background-color: #e3f2fd;
+        border-radius: 5px;
+        padding: 4px;
+        font-size: 0.85rem;
+    }
+</style>
+
+<table class="timetable">
+    <thead>
+        <tr>
+            <th>Time</th>
+            {% for day in ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'] %}
+                <th>{{ day }}</th>
+            {% endfor %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for hour in range(8, 18) %}
+        <tr>
+            <td>{{ "%02d:00 - %02d:00" % (hour, hour + 1) }}</td>
+            {% for day in ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'] %}
+            <td>
+                {% for course in courses %}
+                    {% if course.day_of_week == day
+                          and course.start_time.hour <= hour < course.end_time.hour %}
+                        <div class="course-block">
+                            <strong>{{ course.course_code }}</strong><br>
+                            <strong>{{ course.course_name }}</strong><br>
+                            <strong>{{ course.location }}</strong><br>
+                            {{ course.start_time.strftime('%H:%M') }} - {{ course.end_time.strftime('%H:%M') }}<br>
+                            {{ course.instructor }}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<a href="{{ url_for('main.dashboard') }}" class="btn btn-outline-secondary mt-4">Back to Dashboard</a>
+{% endblock %}
