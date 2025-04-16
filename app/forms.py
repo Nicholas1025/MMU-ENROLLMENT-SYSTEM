@@ -1,16 +1,22 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, IntegerField, TextAreaField, SelectField, TimeField
-from wtforms.validators import DataRequired, Email, EqualTo, Length
+from wtforms.validators import DataRequired, Email, EqualTo, Length, ValidationError
 
 DEPARTMENTS = [("FIST", "FIST"), ("FCI", "FCI"), ("FOB", "FOB")]
 
 class StudentRegisterForm(FlaskForm):
     name = StringField("Full Name", validators=[DataRequired()])
-    email = StringField("Email", validators=[DataRequired(), Email()])
+    email = StringField("Email", validators=[
+        DataRequired(), 
+        Email(), 
+    ])
     password = PasswordField("Password", validators=[DataRequired(), Length(min=6)])
     confirm = PasswordField("Confirm Password", validators=[DataRequired(), EqualTo('password')])
     department = SelectField("Department", choices=DEPARTMENTS, validators=[DataRequired()])
     submit = SubmitField("Register")
+    def validate_email(self, field):
+        if not field.data.endswith("@student.mmu.edu.my"):
+            raise ValidationError("Email must end with @student.mmu.edu.my")
 
 class StudentLoginForm(FlaskForm):
     email = StringField("Email", validators=[DataRequired(), Email()])
