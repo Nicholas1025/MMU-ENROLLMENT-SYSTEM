@@ -1,0 +1,330 @@
+{
+  "students": [
+    {
+      "name": "Alice Tan",
+      "email": "alice100@student.mmu.edu.my",
+      "department": "FIST",
+      "password": "123123"
+    },
+    {
+      "name": "Ben Tan",
+      "email": "ben101@student.mmu.edu.my",
+      "department": "FIST",
+      "password": "123123"
+    },
+    {
+      "name": "Carmen Tan",
+      "email": "carmen102@student.mmu.edu.my",
+      "department": "FIST",
+      "password": "123123"
+    },
+    {
+      "name": "Daniel Tan",
+      "email": "daniel103@student.mmu.edu.my",
+      "department": "FIST",
+      "password": "123123"
+    },
+    {
+      "name": "Elena Tan",
+      "email": "elena104@student.mmu.edu.my",
+      "department": "FIST",
+      "password": "123123"
+    },
+    {
+      "name": "Faris Tan",
+      "email": "faris105@student.mmu.edu.my",
+      "department": "FIST",
+      "password": "123123"
+    },
+    {
+      "name": "Grace Tan",
+      "email": "grace106@student.mmu.edu.my",
+      "department": "FIST",
+      "password": "123123"
+    },
+    {
+      "name": "Hafiz Tan",
+      "email": "hafiz107@student.mmu.edu.my",
+      "department": "FIST",
+      "password": "123123"
+    },
+    {
+      "name": "Ivy Tan",
+      "email": "ivy108@student.mmu.edu.my",
+      "department": "FIST",
+      "password": "123123"
+    },
+    {
+      "name": "Jason Tan",
+      "email": "jason109@student.mmu.edu.my",
+      "department": "FIST",
+      "password": "123123"
+    },
+    {
+      "name": "Kelly Tan",
+      "email": "kelly110@student.mmu.edu.my",
+      "department": "FIST",
+      "password": "123123"
+    },
+    {
+      "name": "Leon Tan",
+      "email": "leon111@student.mmu.edu.my",
+      "department": "FIST",
+      "password": "123123"
+    },
+    {
+      "name": "Mira Tan",
+      "email": "mira112@student.mmu.edu.my",
+      "department": "FIST",
+      "password": "123123"
+    },
+    {
+      "name": "Nathan Tan",
+      "email": "nathan113@student.mmu.edu.my",
+      "department": "FIST",
+      "password": "123123"
+    },
+    {
+      "name": "Olivia Tan",
+      "email": "olivia114@student.mmu.edu.my",
+      "department": "FIST",
+      "password": "123123"
+    },
+    {
+      "name": "Pravin Tan",
+      "email": "pravin115@student.mmu.edu.my",
+      "department": "FIST",
+      "password": "123123"
+    },
+    {
+      "name": "Queenie Tan",
+      "email": "queenie116@student.mmu.edu.my",
+      "department": "FIST",
+      "password": "123123"
+    },
+    {
+      "name": "Rashid Tan",
+      "email": "rashid117@student.mmu.edu.my",
+      "department": "FIST",
+      "password": "123123"
+    },
+    {
+      "name": "Sarah Tan",
+      "email": "sarah118@student.mmu.edu.my",
+      "department": "FIST",
+      "password": "123123"
+    },
+    {
+      "name": "Terry Tan",
+      "email": "terry119@student.mmu.edu.my",
+      "department": "FIST",
+      "password": "123123"
+    }
+  ],
+  "courses": [
+    {
+      "course_code": "FIST201",
+      "course_name": "Course 1",
+      "instructor": "Dr. Ong",
+      "quota": 30,
+      "credits": 3,
+      "semester": "Trimester 2 2025",
+      "location": "Room B100",
+      "description": "This is course 1.",
+      "department": "FIST",
+      "day_of_week": "Tuesday",
+      "start_time": "14:00:00",
+      "end_time": "16:00:00"
+    },
+    {
+      "course_code": "FIST202",
+      "course_name": "Course 2",
+      "instructor": "Dr. Tan",
+      "quota": 30,
+      "credits": 3,
+      "semester": "Trimester 2 2025",
+      "location": "Room B101",
+      "description": "This is course 2.",
+      "department": "FIST",
+      "day_of_week": "Tuesday",
+      "start_time": "15:00:00",
+      "end_time": "17:00:00"
+    },
+    {
+      "course_code": "FIST203",
+      "course_name": "Course 3",
+      "instructor": "Dr. Lee",
+      "quota": 30,
+      "credits": 3,
+      "semester": "Trimester 2 2025",
+      "location": "Room B102",
+      "description": "This is course 3.",
+      "department": "FIST",
+      "day_of_week": "Monday",
+      "start_time": "10:00:00",
+      "end_time": "12:00:00"
+    },
+    {
+      "course_code": "FIST204",
+      "course_name": "Course 4",
+      "instructor": "Dr. Tan",
+      "quota": 30,
+      "credits": 3,
+      "semester": "Trimester 2 2025",
+      "location": "Room B103",
+      "description": "This is course 4.",
+      "department": "FIST",
+      "day_of_week": "Tuesday",
+      "start_time": "09:00:00",
+      "end_time": "11:00:00"
+    },
+    {
+      "course_code": "FIST205",
+      "course_name": "Course 5",
+      "instructor": "Dr. Lee",
+      "quota": 30,
+      "credits": 3,
+      "semester": "Trimester 2 2025",
+      "location": "Room B104",
+      "description": "This is course 5.",
+      "department": "FIST",
+      "day_of_week": "Tuesday",
+      "start_time": "10:00:00",
+      "end_time": "12:00:00"
+    }
+  ],
+  "enrollments": [
+    {
+      "student_id": 18,
+      "course_id": 1
+    },
+    {
+      "student_id": 6,
+      "course_id": 1
+    },
+    {
+      "student_id": 13,
+      "course_id": 1
+    },
+    {
+      "student_id": 8,
+      "course_id": 1
+    },
+    {
+      "student_id": 9,
+      "course_id": 1
+    },
+    {
+      "student_id": 16,
+      "course_id": 1
+    },
+    {
+      "student_id": 20,
+      "course_id": 1
+    },
+    {
+      "student_id": 12,
+      "course_id": 2
+    },
+    {
+      "student_id": 16,
+      "course_id": 2
+    },
+    {
+      "student_id": 19,
+      "course_id": 2
+    },
+    {
+      "student_id": 1,
+      "course_id": 2
+    },
+    {
+      "student_id": 4,
+      "course_id": 2
+    },
+    {
+      "student_id": 18,
+      "course_id": 2
+    },
+    {
+      "student_id": 6,
+      "course_id": 2
+    },
+    {
+      "student_id": 13,
+      "course_id": 3
+    },
+    {
+      "student_id": 16,
+      "course_id": 3
+    },
+    {
+      "student_id": 5,
+      "course_id": 3
+    },
+    {
+      "student_id": 6,
+      "course_id": 3
+    },
+    {
+      "student_id": 1,
+      "course_id": 3
+    },
+    {
+      "student_id": 9,
+      "course_id": 3
+    },
+    {
+      "student_id": 17,
+      "course_id": 3
+    },
+    {
+      "student_id": 20,
+      "course_id": 3
+    },
+    {
+      "student_id": 16,
+      "course_id": 4
+    },
+    {
+      "student_id": 9,
+      "course_id": 4
+    },
+    {
+      "student_id": 2,
+      "course_id": 4
+    },
+    {
+      "student_id": 12,
+      "course_id": 4
+    },
+    {
+      "student_id": 3,
+      "course_id": 5
+    },
+    {
+      "student_id": 8,
+      "course_id": 5
+    },
+    {
+      "student_id": 4,
+      "course_id": 5
+    },
+    {
+      "student_id": 16,
+      "course_id": 5
+    },
+    {
+      "student_id": 1,
+      "course_id": 5
+    },
+    {
+      "student_id": 6,
+      "course_id": 5
+    },
+    {
+      "student_id": 18,
+      "course_id": 5
+    }
+  ]
+}

@@ -348,3 +348,52 @@ def init_demo():
 
     db.session.commit()
     return "✅ Demo data inserted (Students + Courses + Enrollments)"
+
+
+@main.route("/import-sample-data")
+def import_sample_data():
+    import json
+    from datetime import datetime
+    from .models import db, Student, Course, Enrollment
+
+    with open("sample_data.json") as f:
+        data = json.load(f)
+
+    # === Import Students ===
+    for s in data["students"]:
+        if not Student.query.filter_by(email=s["email"]).first():
+            student = Student(name=s["name"], email=s["email"], department=s["department"])
+            student.set_password(s["password"])
+            db.session.add(student)
+
+    db.session.commit()
+
+    # === Import Courses ===
+    for c in data["courses"]:
+        if not Course.query.filter_by(course_code=c["course_code"]).first():
+            course = Course(
+                course_code=c["course_code"],
+                course_name=c["course_name"],
+                instructor=c["instructor"],
+                quota=c["quota"],
+                credits=c["credits"],
+                semester=c["semester"],
+                location=c["location"],
+                description=c["description"],
+                department=c["department"],
+                day_of_week=c["day_of_week"],
+                start_time=datetime.strptime(c["start_time"], "%H:%M:%S").time(),
+                end_time=datetime.strptime(c["end_time"], "%H:%M:%S").time()
+            )
+            db.session.add(course)
+
+    db.session.commit()
+
+    # === Import Enrollments ===
+    for e in data["enrollments"]:
+        if not Enrollment.query.filter_by(student_id=e["student_id"], course_id=e["course_id"]).first():
+            enrollment = Enrollment(student_id=e["student_id"], course_id=e["course_id"])
+            db.session.add(enrollment)
+
+    db.session.commit()
+    return "✅ Sample data imported from sample_data.json"
