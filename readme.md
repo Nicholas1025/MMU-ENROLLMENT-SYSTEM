@@ -85,7 +85,7 @@ MMU-ENROLLMENT-SYSTEM/
 
 ## ✍️ Credits
 
-Developed by **Nicholas Tay Jun Yang and Loh Jia Xian**  
+
 Course: TSE6223 Software Engineering @ MMU  
 Semester: April 2025  
 Progress: 50% (still actively expanding and polishing features)
