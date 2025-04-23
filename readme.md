@@ -100,7 +100,6 @@ MMU-ENROLLMENT-SYSTEM/
 
 Course: TSE6223 Software Engineering @ MMU  
 Semester: April 2025  
-Progress: 75% (still actively expanding and polishing features)
 
 ---
 
