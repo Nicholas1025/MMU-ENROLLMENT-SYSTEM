@@ -1,22 +1,35 @@
 {% extends "base.html" %}
 {% block title %}My Courses{% endblock %}
 {% block content %}
-<h2>My Registered Courses</h2>
+<h2>My Registered Sections</h2>
+
 <table class="table table-striped">
     <thead>
         <tr>
-            <th>Course Name</th>
+            <th>Course</th>
+            <th>Section</th>
+            <th>Type</th>
             <th>Instructor</th>
+            <th>Day</th>
+            <th>Time</th>
+            <th>Location</th>
         </tr>
     </thead>
     <tbody>
-        {% for e in enrollments %}
+        {% for s in sections %}
         <tr>
-            <td>{{ e.course.course_name }}</td>
-            <td>{{ e.course.instructor }}</td>
+            <td>{{ s.course.course_code }} - {{ s.course.course_name }}</td>
+            <td>{{ s.name }}</td>
+            <td>{{ s.type }}</td>
+            <td>{{ s.instructor }}</td>
+            <td>{{ s.day }}</td>
+            <td>{{ s.start_time.strftime('%H:%M') }} - {{ s.end_time.strftime('%H:%M') }}</td>
+            <td>{{ s.location }}</td>
+            
         </tr>
         {% endfor %}
     </tbody>
 </table>
+
 <a href="{{ url_for('main.dashboard') }}" class="btn btn-outline-secondary">Back to Dashboard</a>
 {% endblock %}

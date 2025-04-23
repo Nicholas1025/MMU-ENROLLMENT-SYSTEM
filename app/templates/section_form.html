@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block content %}
+<h2>{{ title }}</h2>
+<form method="POST">
+    {{ form.hidden_tag() }}
+
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            {{ form.course_id.label }} {{ form.course_id(class="form-select") }}
+        </div>
+        <div class="col-md-4 mb-3">
+            {{ form.name.label }} {{ form.name(class="form-control") }}
+        </div>
+        <div class="col-md-4 mb-3">
+            {{ form.type.label }} {{ form.type(class="form-select") }}
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            {{ form.instructor.label }} {{ form.instructor(class="form-control") }}
+        </div>
+        <div class="col-md-4 mb-3">
+            {{ form.location.label }} {{ form.location(class="form-control") }}
+        </div>
+        <div class="col-md-4 mb-3">
+            {{ form.day_of_week.label }} {{ form.day_of_week(class="form-select") }}
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            {{ form.start_time.label }} {{ form.start_time(class="form-control") }}
+        </div>
+        <div class="col-md-4 mb-3">
+            {{ form.end_time.label }} {{ form.end_time(class="form-control") }}
+        </div>
+        <div class="col-md-4 mb-3">
+            {{ form.quota.label }} {{ form.quota(class="form-control") }}
+        </div>
+    </div>
+
+    <div class="mt-2">
+        {{ form.submit(class="btn btn-success") }}
+    </div>
+</form>
+{% endblock %}

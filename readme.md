@@ -5,7 +5,7 @@ A web-based course enrollment system built with **Python + Flask + SQLite**, des
 
 ---
 
-## ✅ Features (Progress: 50% - Ongoing)
+## ✅ Features (Progress: 70% - )
 
 ### 👨‍🎓 Student Features
 - Student registration & login (with hashed passwords)
@@ -13,14 +13,20 @@ A web-based course enrollment system built with **Python + Flask + SQLite**, des
 - View & enroll available courses (filtered by department)
 - Real-time **quota checking** and **duplicate prevention**
 - **Time conflict detection** (based on day and time fields)
+- Enroll in **Lecture + Tutorial/Lab sections** per course
+- **Section switching** (change Lecture or Tutorial time)
 - View enrolled courses
-- 📅 **Weekly Timetable View**
+- 📅 **Weekly Timetable View** with visual blocks
+- Drop entire course (with all sections)
 
 ### 🧑‍💼 Admin Features
 - Admin login
 - Add, edit, delete courses
+- Add, edit, delete **sections** (Lecture / Tutorial / Lab)
 - View all courses
-- View **enrolled students per course**
+- View all sections grouped by course
+- View **enrolled students per section**
+- View course details page with section breakdown
 
 ---
 
@@ -48,6 +54,12 @@ MMU-ENROLLMENT-SYSTEM/
 │       ├── register.html
 │       ├── dashboard.html
 │       ├── timetable.html
+│       ├── admin_course_details.html
+│       ├── admin_section_students.html
+│       ├── course_detail.html
+│       ├── course_form.html
+│       ├── section_form.html
+│       ├── select_tutorial.html
 │       └── admin_*.html
 ├── app.db
 ├── run.py
@@ -88,18 +100,27 @@ MMU-ENROLLMENT-SYSTEM/
 
 Course: TSE6223 Software Engineering @ MMU  
 Semester: April 2025  
-Progress: 50% (still actively expanding and polishing features)
+Progress: 75% (still actively expanding and polishing features)
 
 ---
 
 ## 📌 TODO
 
-- [ ] PDF export for admin course student list
-- [ ] Search bar for student dashboard
-- [ ] Admin analytics dashboard (charts)
-- [ ] User profile settings
+### 🛠 Current Features in Progress
+- [ ] PDF export for admin course student list  
+- [ ] Search bar for student dashboard  
+- [ ] Admin analytics dashboard with charts  
+- [ ] User profile settings  
 
-http://127.0.0.1:5000/admin/dashboard admin login page
- admin = Admin(username="admin")
-            admin.set_password("admin123")
+### 🧠 Smart Enrollment Logic (Coming Soon)
+- [ ] Enforce **prerequisite check** before allowing course enrollment  
+- [ ] Implement **credit hour limit** (e.g., max 18 credit hours)  
+- [ ] Highlight conflicting sections in Dashboard before selection (conflict prediction system)  
+
+### 🔍 UI / UX Improvements (Planned)
+- [ ] Add search bar to student dashboard (filter by course name)  
+- [ ] Improve form error feedback (display all validation messages clearly)  
+- [ ] Prevent duplicate course code/name during course creation (admin validation)
+
+
 

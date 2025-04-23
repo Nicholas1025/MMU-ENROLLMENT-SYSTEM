@@ -31,21 +31,32 @@ class AdminLoginForm(FlaskForm):
 class CourseAddForm(FlaskForm):
     course_code = StringField("Course Code", validators=[DataRequired()])
     course_name = StringField("Course Name", validators=[DataRequired()])
-    instructor = StringField("Instructor", validators=[DataRequired()])
-    quota = IntegerField("Quota", validators=[DataRequired()])
     credits = IntegerField("Credits", validators=[DataRequired()])
     semester = StringField("Semester", validators=[DataRequired()])
-    schedule = StringField("Schedule", validators=[DataRequired()])
-    location = StringField("Location", validators=[DataRequired()])
-    department = SelectField("Department", choices=DEPARTMENTS, validators=[DataRequired()])
-    day_of_week = SelectField("Day of Week", choices=[
-        ("Monday", "Monday"), ("Tuesday", "Tuesday"), ("Wednesday", "Wednesday"),
-        ("Thursday", "Thursday"), ("Friday", "Friday")
+    department = SelectField("Department", choices=[
+        ("FIST", "FIST"), ("FCI", "FCI"), ("FOB", "FOB")
     ], validators=[DataRequired()])
-    start_time = TimeField("Start Time", validators=[DataRequired()])
-    end_time = TimeField("End Time", validators=[DataRequired()])
     description = TextAreaField("Description", validators=[DataRequired()])
     submit = SubmitField("Add Course")
 
+
 class CourseEditForm(CourseAddForm):
     submit = SubmitField("Update Course")
+
+
+class SectionForm(FlaskForm):
+    course_id = SelectField("Course", coerce=int, validators=[DataRequired()])
+    name = StringField("Section Name", validators=[DataRequired()])
+    type = SelectField("Section Type", choices=[("Lecture", "Lecture"), ("Tutorial", "Tutorial"), ("Lab", "Lab")])
+    instructor = StringField("Instructor", validators=[DataRequired()])
+    location = StringField("Location", validators=[DataRequired()])
+    day_of_week = SelectField("Day of Week", choices=[
+        ("Monday", "Monday"), ("Tuesday", "Tuesday"), ("Wednesday", "Wednesday"),
+        ("Thursday", "Thursday"), ("Friday", "Friday")
+    ])
+    start_time = TimeField("Start Time", validators=[DataRequired()])
+    end_time = TimeField("End Time", validators=[DataRequired()])
+    quota = IntegerField("Quota", validators=[DataRequired()])
+    submit = SubmitField("Save Section")
+
+

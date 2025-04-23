@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Select Lecture - {{ course.course_code }}{% endblock %}
+{% block content %}
+<h2>{{ course.course_code }} - {{ course.course_name }}</h2>
+<p><strong>Credits:</strong> {{ course.credits }} | <strong>Semester:</strong> {{ course.semester }}</p>
+<p><strong>Department:</strong> {{ course.department }}</p>
+<hr>
+
+<h4>Available Lecture Sections</h4>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Section</th>
+            <th>Instructor</th>
+            <th>Day</th>
+            <th>Time</th>
+            <th>Location</th>
+            <th>Quota</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for section in lectures %}
+        <tr>
+            <td>{{ section.name }}</td>
+            <td>{{ section.instructor }}</td>
+            <td>{{ section.day }}</td>
+            <td>{{ section.start_time.strftime('%H:%M') }} - {{ section.end_time.strftime('%H:%M') }}</td>
+            <td>{{ section.location }}</td>
+            <td>{{ section.enrollments|length }}/{{ section.quota }}</td>
+            <td>
+                {% if section.id in enrolled_section_ids %}
+                    <span class="text-muted">Already Enrolled</span>
+                    <a href="{{ url_for('main.change_section', section_id=section.id) }}" class="btn btn-sm btn-outline-primary ms-2">Change</a>
+                {% else %}
+                    <a href="{{ url_for('main.select_tutorial', course_id=course.id, lecture_id=section.id) }}" class="btn btn-sm btn-primary">Select</a>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<a href="{{ url_for('main.dashboard') }}" class="btn btn-outline-secondary mt-3">Back to Dashboard</a>
+{% endblock %}

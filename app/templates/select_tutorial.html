@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Select Tutorial - {{ course.course_code }}{% endblock %}
+{% block content %}
+<h2>{{ course.course_code }} - {{ course.course_name }}</h2>
+<p><strong>Select one Tutorial or Lab section</strong> to complete your registration.</p>
+<hr>
+
+<form method="POST" action="{{ url_for('main.finalize_enrollment', course_id=course.id) }}">
+
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <input type="hidden" name="lecture_id" value="{{ lecture_id }}">
+
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Select</th>
+                <th>Section</th>
+                <th>Type</th>
+                <th>Instructor</th>
+                <th>Day</th>
+                <th>Time</th>
+                <th>Location</th>
+                <th>Quota</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for section in tutorials %}
+            <tr>
+                <td>
+                    <input type="radio" name="tutorial_id" value="{{ section.id }}"
+                        {% for s in enrolled_sections %}
+                            {% if s.course_id == section.course_id and s.type == section.type %}
+                                disabled
+                            {% endif %}
+                        {% endfor %}>
+                </td>
+                <td>{{ section.name }}</td>
+                <td>{{ section.type }}</td>
+                <td>{{ section.instructor }}</td>
+                <td>{{ section.day }}</td>
+                <td>{{ section.start_time.strftime('%H:%M') }} - {{ section.end_time.strftime('%H:%M') }}</td>
+                <td>{{ section.location }}</td>
+                <td>{{ section.enrollments|length }}/{{ section.quota }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <button type="submit" class="btn btn-success">Confirm Registration</button>
+</form>
+
+<a href="{{ url_for('main.dashboard') }}" class="btn btn-outline-secondary mt-3">Cancel</a>
+{% endblock %}
+

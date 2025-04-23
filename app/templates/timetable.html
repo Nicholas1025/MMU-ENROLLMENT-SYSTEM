@@ -39,15 +39,14 @@
             <td>{{ "%02d:00 - %02d:00" % (hour, hour + 1) }}</td>
             {% for day in ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'] %}
             <td>
-                {% for course in courses %}
-                    {% if course.day_of_week == day
-                          and course.start_time.hour <= hour < course.end_time.hour %}
+                {% for s in sections %}
+                    {% if s.day == day and s.start_time.hour <= hour < s.end_time.hour %}
                         <div class="course-block">
-                            <strong>{{ course.course_code }}</strong><br>
-                            <strong>{{ course.course_name }}</strong><br>
-                            <strong>{{ course.location }}</strong><br>
-                            {{ course.start_time.strftime('%H:%M') }} - {{ course.end_time.strftime('%H:%M') }}<br>
-                            {{ course.instructor }}
+                            <strong>{{ s.course.course_code }}</strong><br>
+                            {{ s.name }} ({{ s.type }})<br>
+                            {{ s.location }}<br>
+                            {{ s.start_time.strftime('%H:%M') }} - {{ s.end_time.strftime('%H:%M') }}<br>
+                            {{ s.instructor }}
                         </div>
                     {% endif %}
                 {% endfor %}

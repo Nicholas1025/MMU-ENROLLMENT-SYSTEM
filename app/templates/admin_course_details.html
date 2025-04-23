@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Course Details{% endblock %}
+{% block content %}
+<h2>{{ course.course_code }} - {{ course.course_name }}</h2>
+<p><strong>Department:</strong> {{ course.department }} | <strong>Credits:</strong> {{ course.credits }}</p>
+
+<h4>Sections</h4>
+<table class="table table-bordered">
+  <thead>
+    <tr>
+      <th>Section Name</th>
+      <th>Type</th>
+      <th>Instructor</th>
+      <th>Day</th>
+      <th>Time</th>
+      <th>Quota</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for section in course.sections %}
+    <tr>
+      <td>{{ section.name }}</td>
+      <td>{{ section.type }}</td>
+      <td>{{ section.instructor }}</td>
+      <td>{{ section.day }}</td>
+      <td>{{ section.start_time.strftime('%H:%M') }} - {{ section.end_time.strftime('%H:%M') }}</td>
+      <td>{{ section.enrollments|length }}/{{ section.quota }}</td>
+      <td>
+        <a href="{{ url_for('main.admin_view_section_students', section_id=section.id) }}" class="btn btn-sm btn-outline-info">View Students</a>
+        <a href="{{ url_for('main.admin_edit_section', section_id=section.id) }}" class="btn btn-sm btn-outline-primary">Edit</a>
+        <a href="{{ url_for('main.admin_delete_section', section_id=section.id) }}" class="btn btn-sm btn-outline-danger">Delete</a>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% endblock %}
