@@ -100,7 +100,7 @@ MMU-ENROLLMENT-SYSTEM/
 
 Course: TSE6223 Software Engineering @ MMU  
 Semester: April 2025  
-
+📜 This project is licensed under CC BY-NC-ND 4.0.
 ---
 
 ## 📌 TODO
