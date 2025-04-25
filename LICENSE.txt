@@ -1,0 +1,7 @@
+Copyright © 2025 Nicholas Tay Jun Yang
+
+This work is licensed under the Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International License.
+
+You may view, share, and reference this code for personal and educational purposes only. Commercial use, redistribution, or submission as coursework (including university assignments) is strictly prohibited.
+
+Full license: https://creativecommons.org/licenses/by-nc-nd/4.0/
