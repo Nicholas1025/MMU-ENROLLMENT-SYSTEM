@@ -59,22 +59,7 @@ A web-based course enrollment system built with **Python + Flask + SQLite**, des
 
 ## 📦 Folder Structure
 
-MMU-ENROLLMENT-SYSTEM/
-├── app/
-│   ├── __init__.py
-│   ├── models.py
-│   ├── routes.py
-│   ├── forms.py
-│   ├── static/
-│   ├── templates/
-│   │   ├── admin/
-│   │   ├── student/
-│   │   ├── shared/
-│   │   └── base.html
-├── run.py
-├── config.py
-├── requirements.txt
-└── README.md
+ 
 
 ---
 
