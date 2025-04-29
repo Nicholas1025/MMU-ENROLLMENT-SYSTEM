@@ -21,6 +21,8 @@ def create_app():
     def load_user(user_id):
         return Admin.query.get(int(user_id)) or Student.query.get(int(user_id))
 
+
+
     @login_manager.unauthorized_handler
     def unauthorized():
         if request.path.startswith("/admin"):

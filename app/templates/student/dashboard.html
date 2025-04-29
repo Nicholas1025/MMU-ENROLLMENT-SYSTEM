@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+
+<h2 class="mb-3">🎓 Student Dashboard</h2>
+<p>📅 Open Semester: <strong>{{ open_semester }}</strong></p>
+<p>📚 Completed Credit Hours: <strong>{{ total_credits }}</strong></p>
+
+<hr>
+
+<!-- ✅ 可注册课程 -->
+<h4 class="text-success mt-4">✅ Eligible Courses ({{ eligible_courses|length }})</h4>
+{% if eligible_courses %}
+<table class="table table-bordered">
+  <thead class="table-light">
+    <tr>
+      <th>Code</th><th>Name</th><th>Credits</th><th>Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for course in eligible_courses %}
+    <tr>
+      <td>{{ course.course_code }}</td>
+      <td>{{ course.course_name }}</td>
+      <td>{{ course.credits }}</td>
+      <td>
+        {% if course.id in enrolled_course_ids %}
+          <a href="{{ url_for('main.drop', course_id=course.id) }}" class="btn btn-sm btn-outline-danger">Drop</a>
+        {% else %}
+          <a href="{{ url_for('main.course_detail', course_id=course.id) }}" class="btn btn-sm btn-primary">Select Section</a>
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p class="text-muted">No eligible courses this semester.</p>
+{% endif %}
+
+<!-- ❌ 不可注册课程 -->
+<h4 class="text-danger mt-5">❌ Locked Courses ({{ locked_courses|length }})</h4>
+{% if locked_courses %}
+<table class="table table-bordered">
+  <thead class="table-light">
+    <tr>
+      <th>Code</th><th>Name</th><th>Reason</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for course, reason in locked_courses %}
+    <tr>
+      <td>{{ course.course_code }}</td>
+      <td>{{ course.course_name }}</td>
+      <td class="text-danger">{{ reason }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p class="text-muted">No locked courses.</p>
+{% endif %}
+
+<!-- ✔ 已完成课程 -->
+<h4 class="text-secondary mt-5">✔ Completed Courses ({{ completed_courses|length }})</h4>
+{% if completed_courses %}
+<ul class="list-group">
+  {% for course in completed_courses %}
+  <li class="list-group-item d-flex justify-content-between align-items-center">
+    {{ course.course_code }} - {{ course.course_name }}
+    <span class="badge bg-secondary">{{ course.credits }} credits</span>
+  </li>
+  {% endfor %}
+</ul>
+{% else %}
+<p class="text-muted">No completed courses yet.</p>
+{% endif %}
+
+<!-- 其他链接 -->
+<div class="mt-4">
+  <a href="{{ url_for('main.my_courses') }}" class="btn btn-outline-primary">My Courses</a>
+  <a href="{{ url_for('main.timetable') }}" class="btn btn-outline-info">My Timetable</a>
+</div>
+
+{% endblock %}

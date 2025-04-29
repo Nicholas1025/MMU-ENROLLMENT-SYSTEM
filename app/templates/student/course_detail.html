@@ -25,7 +25,12 @@
             <td>{{ section.name }}</td>
             <td>{{ section.instructor }}</td>
             <td>{{ section.day }}</td>
-            <td>{{ section.start_time.strftime('%H:%M') }} - {{ section.end_time.strftime('%H:%M') }}</td>
+            <td>
+                {{ section.start_time.strftime('%H:%M') if section.start_time else '—' }}
+                -
+                {{ section.end_time.strftime('%H:%M') if section.end_time else '—' }}
+              </td>
+              
             <td>{{ section.location }}</td>
             <td>{{ section.enrollments|length }}/{{ section.quota }}</td>
             <td>

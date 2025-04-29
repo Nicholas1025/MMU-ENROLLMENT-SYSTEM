@@ -64,4 +64,7 @@ class SectionForm(FlaskForm):
     quota = IntegerField("Quota", validators=[DataRequired()])
     submit = SubmitField("Save Section")
 
+class SemesterSettingForm(FlaskForm):
+    semester = SelectField("Open Semester", choices=[], validators=[DataRequired()])
+    submit = SubmitField("Save Semester")
 

@@ -8,6 +8,14 @@
   {% endfor %}
 {% endfor %}
 
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mb-0">📚 Admin Dashboard</h2>
+    <a href="{{ url_for('main.admin_settings') }}" class="btn btn-outline-secondary btn-sm">⚙️ System Settings</a>
+  </div>
+  
+  <p class="text-muted mb-4">📅 Current Open Semester: <strong>{{ open_semester }}</strong></p>
+  
+
 <h2>Add New Course</h2>
 <form method="POST">
     {{ form.hidden_tag() }}

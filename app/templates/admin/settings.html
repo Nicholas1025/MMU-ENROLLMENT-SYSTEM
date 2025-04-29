@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Admin Settings{% endblock %}
+{% block content %}
+
+<h2 class="mb-4">⚙️ System Settings</h2>
+
+<form method="POST">
+    {{ form.hidden_tag() }}
+    
+    <div class="mb-3">
+        {{ form.semester.label(class="form-label") }}
+        {{ form.semester(class="form-select") }}
+    </div>
+    
+    <button type="submit" class="btn btn-primary">{{ form.submit.label.text }}</button>
+</form>
+
+<a href="{{ url_for('main.admin_dashboard') }}" class="btn btn-outline-secondary mt-3">Back to Dashboard</a>
+
+{% endblock %}

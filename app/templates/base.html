@@ -85,6 +85,7 @@
           <a class="btn btn-nav" href="{{ url_for('main.admin_logout') }}">Logout</a>
         {% elif current_user.is_student %}
           <a class="btn btn-nav" href="{{ url_for('main.dashboard') }}">Dashboard</a>
+          <a class="btn btn-nav" href="{{ url_for('main.profile') }}">My Profile</a>
           <a class="btn btn-nav" href="{{ url_for('main.logout') }}">Logout</a>
         {% endif %}
       {% else %}

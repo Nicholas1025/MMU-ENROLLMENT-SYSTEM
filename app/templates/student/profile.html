@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}My Profile{% endblock %}
+{% block content %}
+
+<h2 class="mb-3">👤 Student Profile</h2>
+
+<p><strong>Name:</strong> {{ student.name }}</p>
+<p><strong>Email:</strong> {{ student.email }}</p>
+<p><strong>Department:</strong> {{ student.department }}</p>
+<p><strong>Open Semester:</strong> {{ open_semester }}</p>
+<p><strong>Completed Credits:</strong> {{ total_completed_credits }}</p>
+
+<hr>
+
+<h4>✅ Current Semester Enrollments</h4>
+{% if current_sections %}
+<table class="table table-bordered">
+  <thead><tr><th>Course</th><th>Section</th><th>Type</th><th>Day</th><th>Time</th></tr></thead>
+  <tbody>
+    {% for course, section in current_sections %}
+    <tr>
+      <td>{{ course.course_code }} - {{ course.course_name }}</td>
+      <td>{{ section.name }}</td>
+      <td>{{ section.type }}</td>
+      <td>{{ section.day }}</td>
+      <td>{{ section.start_time.strftime('%H:%M') }} - {{ section.end_time.strftime('%H:%M') }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p class="text-muted">No current semester registrations.</p>
+{% endif %}
+
+<hr>
+
+<h4>📘 Completed Courses</h4>
+{% if completed_courses %}
+<table class="table table-striped">
+  <thead><tr><th>Course</th><th>Semester</th><th>Credits</th></tr></thead>
+  <tbody>
+    {% for entry in completed_courses %}
+    <tr>
+      <td>{{ entry.course.course_code }} - {{ entry.course.course_name }}</td>
+      <td>{{ entry.course.semester }}</td>
+      <td>{{ entry.course.credits }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p class="text-muted">No completed courses yet.</p>
+{% endif %}
+
+{% endblock %}

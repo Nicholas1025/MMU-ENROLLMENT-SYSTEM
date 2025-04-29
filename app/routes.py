@@ -1,22 +1,26 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request, session, abort
-from flask_login import login_required, current_user
-from .forms import StudentRegisterForm, StudentLoginForm
-from .models import db, Student, Course, Section
-from .models import Course, Enrollment
-from .forms import CourseAddForm
-from .forms import CourseAddForm, AdminLoginForm
-from .forms import CourseEditForm
-from .forms import SectionForm
-from flask_login import login_user
-from flask_login import UserMixin
-from flask_login import logout_user
+from flask_login import (
+    login_required, login_user, logout_user, current_user, UserMixin
+)
 from flask_wtf.csrf import generate_csrf
+
+from .models import (
+    db, Student, Admin, Course, Section, Enrollment, SystemSetting
+)
+from .forms import (
+    StudentRegisterForm, StudentLoginForm, AdminLoginForm,
+    CourseAddForm, CourseEditForm, SectionForm, SemesterSettingForm
+)
+
+from flask import make_response
 
 main = Blueprint("main", __name__)
 
+
+# ==================== Shared Start ========================
 @main.route("/")
 def index():
-    return render_template("index.html")
+    return render_template("shared/index.html")
 
 @main.route("/register", methods=["GET", "POST"])
 def register():
@@ -37,7 +41,7 @@ def register():
         db.session.commit()
         flash("Registration successful!", "success")
         return redirect(url_for("main.login"))
-    return render_template("register.html", form=form)
+    return render_template("shared/register.html", form=form)
 
 
 @main.route("/login", methods=["GET", "POST"])
@@ -51,9 +55,33 @@ def login():
             return redirect(url_for("main.dashboard"))
         else:
             flash("Invalid credentials.", "danger")
-    return render_template("login.html", form=form)
+    return render_template("shared/login.html", form=form)
+
+@main.route("/admin/login", methods=["GET", "POST"])
+def admin_login():
+    form = AdminLoginForm()
+    if form.validate_on_submit():
+        admin = Admin.query.filter_by(username=form.username.data).first()
+        if admin and admin.check_password(form.password.data):
+            login_user(admin)  # ✅ 用 Flask-Login 登录
+            flash("Admin login successful!", "success")
+            return redirect(url_for("main.admin_dashboard"))
+        else:
+            flash("Invalid credentials.", "danger")
+    return render_template("shared/admin_login.html", form=form)
 
 
+@main.route("/logout")
+def logout():
+    is_student = getattr(current_user, 'is_student', False)
+    logout_user()
+    flash("You have been logged out.", "info")
+    return redirect(url_for("main.login" if is_student else "main.admin_login"))
+
+# ==================== Shared End ========================
+
+# ==================== Student Start =======================
+# ✅ PATCH 2: Upgraded student dashboard logic for classification
 
 @main.route("/dashboard")
 @login_required
@@ -62,41 +90,89 @@ def dashboard():
         abort(403)
 
     student = current_user
-    selected_semester = request.args.get('semester')
+    student_id = student.id
 
-    # 查询所有课程（可选 semester 过滤）
-    course_query = Course.query.filter_by(department=student.department)
-    if selected_semester:
-        course_query = course_query.filter_by(semester=selected_semester)
-    courses = course_query.all()
+    # 获取当前开放学期（默认 Term2410）
+    setting = SystemSetting.query.filter_by(key="open_semester").first()
+    open_semester = setting.value if setting else "Term2410"
 
-    # 查询所有可选学期（供下拉菜单用）
-    all_semesters = (
-        db.session.query(Course.semester)
-        .filter_by(department=student.department)
-        .distinct()
-        .order_by(Course.semester)
-        .all()
-    )
-    all_semesters = [s[0] for s in all_semesters]
+    # 获取学生已完成的课程（学期 < 开放学期）
+    completed_courses = db.session.query(Course).join(Section).join(Enrollment).filter(
+        Enrollment.student_id == student_id,
+        Course.semester < open_semester
+    ).distinct().all()
+    completed_course_ids = {c.id for c in completed_courses}
 
-    # 已注册的 section ID 和对应课程 ID
-    enrolled_section_ids = [e.section_id for e in Enrollment.query.filter_by(student_id=student.id).all()]
+    # 当前学分
+    total_credits = sum(c.credits for c in completed_courses)
+
+    # 获取当前学期所有课程
+    all_courses = Course.query.filter_by(department=student.department).all()
+
+    eligible_courses = []
+    locked_courses = []
+    for course in all_courses:
+        if course.id in completed_course_ids:
+            continue  # 已修，跳过
+        if course.semester != open_semester:
+            locked_courses.append((course, "Not offered this semester"))
+            continue
+        if course.prerequisite and course.prerequisite.id not in completed_course_ids:
+            locked_courses.append((course, f"Missing prerequisite: {course.prerequisite.course_code}"))
+            continue
+        if course.course_code.startswith("FYP") and total_credits < 60:
+            locked_courses.append((course, "Requires ≥ 60 credit hours"))
+            continue
+        eligible_courses.append(course)
+
+        # 获取当前学生已注册的所有 section
+    enrolled_section_ids = [e.section_id for e in Enrollment.query.filter_by(student_id=student_id).all()]
     enrolled_section_objs = Section.query.filter(Section.id.in_(enrolled_section_ids)).all()
     enrolled_course_ids = list({s.course_id for s in enrolled_section_objs})
 
-    # 计算当前学分
-    enrolled_courses = Course.query.filter(Course.id.in_(enrolled_course_ids)).all()
-    total_credits = sum(c.credits for c in enrolled_courses)
 
-    return render_template(
-        "dashboard.html",
-        courses=courses,
-        enrolled_course_ids=enrolled_course_ids,
+    return render_template("student/dashboard.html",
+        eligible_courses=eligible_courses,
+        locked_courses=locked_courses,
+        completed_courses=completed_courses,
         total_credits=total_credits,
-        all_semesters=all_semesters,
-        selected_semester=selected_semester
+        open_semester=open_semester,
+        enrolled_course_ids=enrolled_course_ids  # ✅ 添加这里
     )
+
+
+@main.route("/my-courses")
+@login_required
+def my_courses():
+    student_id = current_user.id
+    setting = SystemSetting.query.filter_by(key="open_semester").first()
+    open_semester = setting.value if setting else "Term2410"
+
+    sections = db.session.query(Section).join(Enrollment).join(Section.course).filter(
+        Enrollment.student_id == student_id,
+        Course.semester == open_semester
+    ).all()
+
+    return render_template("student/my_courses.html", sections=sections, open_semester=open_semester)
+
+
+@main.route("/timetable")
+@login_required
+def timetable():
+    student_id = current_user.id
+
+    # 获取当前开放学期
+    setting = SystemSetting.query.filter_by(key="open_semester").first()
+    open_semester = setting.value if setting else "Term2410"
+
+    # 显式 join Section.course 再 filter
+    sections = db.session.query(Section).join(Enrollment).join(Section.course).filter(
+        Enrollment.student_id == student_id,
+        Course.semester == open_semester
+    ).all()
+
+    return render_template("student/timetable.html", sections=sections, open_semester=open_semester)
+
 
 
 @main.route("/enroll/<int:course_id>")
@@ -162,45 +238,106 @@ def drop(course_id):
     flash("Course and all associated sections dropped.", "info")
     return redirect(url_for("main.dashboard"))
 
-
-@main.route("/my-courses")
+@main.route("/course/<int:course_id>")
 @login_required
-def my_courses():
+def course_detail(course_id):
+    course = Course.query.get_or_404(course_id)
+    lecture_sections = Section.query.filter_by(course_id=course_id, type="Lecture").all()
+    student_id = current_user.id
+
+    enrolled_section_ids = [e.section_id for e in Enrollment.query.filter_by(student_id=student_id).all()]
+    
+    # ➡️ 计算当前已修的学分
+    enrolled_course_ids = set()
+    for enrollment in Enrollment.query.filter_by(student_id=student_id).all():
+        if enrollment.section:
+            enrolled_course_ids.add(enrollment.section.course_id)
+    
+    total_credits = db.session.query(db.func.sum(Course.credits)).filter(Course.id.in_(enrolled_course_ids)).scalar() or 0
+
+    return render_template(
+        "student/course_detail.html",
+        course=course,
+        lectures=lecture_sections,
+        enrolled_section_ids=enrolled_section_ids,
+        total_credits=total_credits  # ✅ 传进去模板
+    )
+
+@main.route("/course/<int:course_id>/select-tutorial")
+@login_required
+def select_tutorial(course_id):
+    lecture_id = request.args.get("lecture_id", type=int)
+    if not lecture_id:
+        flash("Lecture not selected.", "danger")
+        return redirect(url_for("main.dashboard"))
+
+    course = Course.query.get_or_404(course_id)
+    tutorial_sections = Section.query.filter(
+        Section.course_id == course_id,
+        Section.type.in_(["Tutorial", "Lab"])
+    ).all()
+
+    student_id = current_user.id
+    enrolled_section_ids = [e.section_id for e in Enrollment.query.filter_by(student_id=student_id).all()]
+    enrolled_sections = Section.query.filter(Section.id.in_(enrolled_section_ids)).all()
+
+    return render_template("student/select_tutorial.html",
+                        course=course,
+                        lecture_id=lecture_id,
+                        tutorials=tutorial_sections,
+                        enrolled_sections=enrolled_sections,
+                        csrf_token=generate_csrf())    
+
+@main.route("/profile")
+@login_required
+def profile():
     if not current_user.is_student:
         abort(403)
+
     student_id = current_user.id
-    enrollments = Enrollment.query.filter_by(student_id=student_id).all()
-    sections = [e.section for e in enrollments]
+    student = current_user
 
-    return render_template("my_courses.html", sections=sections)
+    # 当前开放学期
+    setting = SystemSetting.query.filter_by(key="open_semester").first()
+    open_semester = setting.value if setting else "Term2410"
 
+    # 所有注册记录（含当前和历史）
+    enrollments = Enrollment.query.filter_by(student_id=student_id).join(Section).join(Section.course).all()
 
-@main.route("/logout")
-def logout():
-    is_student = getattr(current_user, 'is_student', False)
-    logout_user()
-    flash("You have been logged out.", "info")
-    return redirect(url_for("main.login" if is_student else "main.admin_login"))
-
-
-
-from .models import Admin
-
-
-@main.route("/admin/login", methods=["GET", "POST"])
-def admin_login():
-    form = AdminLoginForm()
-    if form.validate_on_submit():
-        admin = Admin.query.filter_by(username=form.username.data).first()
-        if admin and admin.check_password(form.password.data):
-            login_user(admin)  # ✅ 用 Flask-Login 登录
-            flash("Admin login successful!", "success")
-            return redirect(url_for("main.admin_dashboard"))
+    completed = []
+    current = []
+    for e in enrollments:
+        course = e.section.course
+        if course.semester == open_semester:
+            current.append((course, e.section))
         else:
-            flash("Invalid credentials.", "danger")
-    return render_template("admin_login.html", form=form)
+            completed.append((course, e.section))
+
+    # 按课程分组（避免重复）
+    completed_grouped = {}
+    for course, section in completed:
+        if course.id not in completed_grouped:
+            completed_grouped[course.id] = {
+                "course": course,
+                "sections": []
+            }
+        completed_grouped[course.id]["sections"].append(section)
+
+    total_completed_credits = sum(c["course"].credits for c in completed_grouped.values())
+
+    return render_template("student/profile.html",
+        student=student,
+        open_semester=open_semester,
+        total_completed_credits=total_completed_credits,
+        current_sections=current,
+        completed_courses=completed_grouped.values()
+    )
 
 
+#===================== Student End =======================
+
+#===================== Admin Start =======================
+from .models import Admin
 @main.route("/admin/dashboard", methods=["GET", "POST"])
 @login_required
 def admin_dashboard():
@@ -236,9 +373,11 @@ def admin_dashboard():
         flash("Course added!", "success")
         return redirect(url_for("main.admin_dashboard"))
 
-    return render_template("admin_dashboard.html", form=form, courses=courses)
+    # 当前开放学期
+    setting = SystemSetting.query.filter_by(key="open_semester").first()
+    open_semester = setting.value if setting else "Not Set"
 
-
+    return render_template("admin/dashboard.html", form=form, courses=courses, open_semester=open_semester)
 
 
 @main.route("/admin/logout")
@@ -300,18 +439,7 @@ def admin_edit(course_id):
         flash("Course updated!", "success")
         return redirect(url_for("main.admin_dashboard"))
 
-    return render_template("course_form.html", form=form, title="Edit Course")
-
-
-@main.route("/timetable")
-@login_required
-def timetable():
-    student_id = current_user.id
-    enrollments = Enrollment.query.filter_by(student_id=student_id).all()
-    sections = [e.section for e in enrollments]
-
-    return render_template("timetable.html", sections=sections)
-
+    return render_template("admin/course_form.html", form=form, title="Edit Course")
 
 @main.route("/admin/section/<int:section_id>/students")
 @login_required
@@ -321,10 +449,7 @@ def admin_view_section_students(section_id):
 
     section = Section.query.get_or_404(section_id)
     students = [e.student for e in section.enrollments]
-    return render_template("admin_section_students.html", section=section, students=students)
-
-
-
+    return render_template("admin/section_students.html", section=section, students=students)
 
 @main.route("/import-sample-data")
 def import_sample_data():
@@ -401,7 +526,7 @@ def admin_add_section():
         flash("Section added!", "success")
         return redirect(url_for('main.admin_dashboard'))
 
-    return render_template('section_form.html', form=form, title="Add New Section")
+    return render_template('admin/section_form.html', form=form, title="Add New Section")
 
 
 @main.route('/admin/section/edit/<int:section_id>', methods=['GET', 'POST'])
@@ -427,7 +552,7 @@ def admin_edit_section(section_id):
         flash("Section updated!", "success")
         return redirect(url_for('main.admin_dashboard'))
 
-    return render_template('section_form.html', form=form, title="Edit Section")
+    return render_template('admin/section_form.html', form=form, title="Edit Section")
 
 @main.route("/admin/course/<int:course_id>")
 @login_required
@@ -437,7 +562,7 @@ def admin_course_details(course_id):
         return redirect(url_for("main.admin_login"))
 
     course = Course.query.get_or_404(course_id)
-    return render_template("admin_course_details.html", course=course)
+    return render_template("admin/course_details.html", course=course)
 
 @main.route('/admin/section/delete/<int:section_id>')
 @login_required
@@ -451,58 +576,6 @@ def admin_delete_section(section_id):
     db.session.commit()
     flash("Section deleted.", "info")
     return redirect(url_for('main.admin_course_details', course_id=course_id))
-
-@main.route("/course/<int:course_id>")
-@login_required
-def course_detail(course_id):
-    course = Course.query.get_or_404(course_id)
-    lecture_sections = Section.query.filter_by(course_id=course_id, type="Lecture").all()
-    student_id = current_user.id
-
-    enrolled_section_ids = [e.section_id for e in Enrollment.query.filter_by(student_id=student_id).all()]
-    
-    # ➡️ 计算当前已修的学分
-    enrolled_course_ids = set()
-    for enrollment in Enrollment.query.filter_by(student_id=student_id).all():
-        if enrollment.section:
-            enrolled_course_ids.add(enrollment.section.course_id)
-    
-    total_credits = db.session.query(db.func.sum(Course.credits)).filter(Course.id.in_(enrolled_course_ids)).scalar() or 0
-
-    return render_template(
-        "course_detail.html",
-        course=course,
-        lectures=lecture_sections,
-        enrolled_section_ids=enrolled_section_ids,
-        total_credits=total_credits  # ✅ 传进去模板
-    )
-
-
-
-@main.route("/course/<int:course_id>/select-tutorial")
-@login_required
-def select_tutorial(course_id):
-    lecture_id = request.args.get("lecture_id", type=int)
-    if not lecture_id:
-        flash("Lecture not selected.", "danger")
-        return redirect(url_for("main.dashboard"))
-
-    course = Course.query.get_or_404(course_id)
-    tutorial_sections = Section.query.filter(
-        Section.course_id == course_id,
-        Section.type.in_(["Tutorial", "Lab"])
-    ).all()
-
-    student_id = current_user.id
-    enrolled_section_ids = [e.section_id for e in Enrollment.query.filter_by(student_id=student_id).all()]
-    enrolled_sections = Section.query.filter(Section.id.in_(enrolled_section_ids)).all()
-
-    return render_template("select_tutorial.html",
-                        course=course,
-                        lecture_id=lecture_id,
-                        tutorials=tutorial_sections,
-                        enrolled_sections=enrolled_sections,
-                        csrf_token=generate_csrf())    
 
 
 @main.route("/course/<int:course_id>/finalize", methods=["POST"])
@@ -528,17 +601,16 @@ def finalize_enrollment(course_id):
     prereq = course.prerequisite
     if prereq:
         completed_course_ids = [
-            s.course_id for s in Enrollment.query.join(Section)
-            .filter(Enrollment.student_id == student_id).all()
+            e.section.course_id for e in Enrollment.query.filter_by(student_id=student_id).all()
         ]
         if prereq.id not in completed_course_ids:
             flash(f"Cannot register: Prerequisite {prereq.course_code} - {prereq.course_name} not fulfilled.", "danger")
             return redirect(url_for("main.dashboard"))
 
+
     # ✅ 学分上限检查（20 学分）
     current_credits = sum(
-        s.course.credits for s in Enrollment.query.join(Section)
-        .filter(Enrollment.student_id == student_id).all()
+        e.section.course.credits for e in Enrollment.query.filter_by(student_id=student_id).all()
     )
     if current_credits + course.credits > 20:
         flash(f"Cannot register: Credit limit exceeded. You already have {current_credits} credits.", "danger")
@@ -590,84 +662,151 @@ def change_section(section_id):
 
     return redirect(url_for("main.course_detail", course_id=section.course_id))
 
-@main.route("/init-demo")
-def init_demo():
+@main.route("/admin/settings", methods=["GET", "POST"])
+@login_required
+def admin_settings():
+    if not current_user.is_admin:
+        abort(403)
+
+    form = SemesterSettingForm()
+
+    # 自动从数据库读取所有不同的学期作为选项
+    all_semesters = db.session.query(Course.semester).distinct().all()
+    form.semester.choices = [(s[0], s[0]) for s in all_semesters]
+
+    setting = SystemSetting.query.filter_by(key="open_semester").first()
+    if request.method == "GET" and setting:
+        form.semester.data = setting.value
+
+    if form.validate_on_submit():
+        if setting:
+            setting.value = form.semester.data
+        else:
+            setting = SystemSetting(key="open_semester", value=form.semester.data)
+            db.session.add(setting)
+        db.session.commit()
+        flash("Open semester updated!", "success")
+        return redirect(url_for("main.admin_settings"))
+
+    return render_template("admin/settings.html", form=form)
+
+#=================== Admin End =======================
+
+#=================== Database Start =======================
+@main.route("/init-test-data")
+def init_test_data():
     from datetime import time
-    from .models import Student, Course, Section, Enrollment, db
+    import random
 
     db.drop_all()
     db.create_all()
 
-    # === Admin Account ===
-    if not Admin.query.filter_by(username="admin").first():
-        admin = Admin(username="admin")
-        admin.set_password("admin123")
-        db.session.add(admin)
+    # Create Admin
+    admin = Admin(username="admin")
+    admin.set_password("admin123")
+    db.session.add(admin)
 
-    # === Students ===
-    students = [
-        Student(name="Alice Lee", email="alice@student.mmu.edu.my", department="FIST"),
-        Student(name="Bob Tan", email="bob@student.mmu.edu.my", department="FIST"),
-        Student(name="Chloe Wong", email="chloe@student.mmu.edu.my", department="FIST"),
-        Student(name="Daniel Ng", email="daniel@student.mmu.edu.my", department="FCI"),
-        Student(name="Eve Lim", email="eve@student.mmu.edu.my", department="FOB"),
-    ]
-    for s in students:
-        s.set_password("123456")
-        db.session.add(s)
+    # Create Students
+    student_names = ["Alice Lee", "Bob Tan", "Chloe Wong", "Daniel Ng", "Eve Lim",
+                     "Frank Goh", "Grace Chen", "Henry Teo", "Ivy Ng", "Jack Lim",
+                     "Kelly Tan", "Leo Ong", "Mia Tan", "Nathan Ng", "Olivia Lee",
+                     "Peter Wong", "Queenie Tan", "Ryan Goh", "Sophia Teo", "Thomas Lim"]
+    students = []
+    for idx, name in enumerate(student_names):
+        student = Student(
+            name=name,
+            email=f"student{idx+1}@student.mmu.edu.my",
+            department="FIST"
+        )
+        student.set_password("123456")
+        db.session.add(student)
+        students.append(student)
 
-    db.session.flush()  # 立即写入，方便后续引用 id
-
-    # === Courses & Sections ===
-    course1 = Course(
-        course_code="FIST101",
-        course_name="Introduction to AI",
-        credits=3,
-        semester="T1",
-        department="FIST",
-        description="Learn the basics of Artificial Intelligence."
-    )
-    db.session.add(course1)
     db.session.flush()
+        # Create Courses (15 courses with prerequisites)
+    courses = []
+    for i in range(1, 16):
+        course = Course(
+            course_code=f"FIST{i:04}",
+            course_name=f"Course {i}",
+            credits=3 if i < 14 else 6,  # 最后两门当成 FYP 类 6学分
+            semester="Term2330" if i <= 8 else "Term2410",
+            department="FIST",
+            description=f"This is Course {i}.",
+            prerequisite_id=courses[i-2].id if i > 1 else None  # 每门课前一门做 prerequisite
+        )
+        db.session.add(course)
+        db.session.flush()
+        courses.append(course)
 
-    section1 = Section(course_id=course1.id, name="Lec-A1", type="Lecture", instructor="Dr. Ling",
-                       location="A101", day="Monday", start_time=time(9, 0), end_time=time(11, 0), quota=30)
-    section2 = Section(course_id=course1.id, name="Tut-B1", type="Tutorial", instructor="Ms. Tan",
-                       location="B202", day="Tuesday", start_time=time(10, 0), end_time=time(11, 0), quota=20)
-    db.session.add_all([section1, section2])
+        # Create Sections for each course
+        for j in range(2):  # 2 Lectures
+            section = Section(
+                course_id=course.id,
+                name=f"Lec-{i}-{j+1}",
+                type="Lecture",
+                instructor=f"Dr. {chr(65+i)}{j+1}",
+                location=f"A{i}{j+1}01",
+                day=random.choice(["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]),
+                start_time=time(random.randint(8,15), 0),
+                end_time=time(random.randint(16,18), 0),
+                quota=100
+            )
+            db.session.add(section)
+        for j in range(2):  # 2 Labs
+            section = Section(
+                course_id=course.id,
+                name=f"Lab-{i}-{j+1}",
+                type="Lab",
+                instructor=f"Ms. {chr(75+i)}{j+1}",
+                location=f"B{i}{j+1}02",
+                day=random.choice(["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]),
+                start_time=time(random.randint(8,15), 0),
+                end_time=time(random.randint(16,18), 0),
+                quota=40
+            )
+            db.session.add(section)
 
-    course2 = Course(
-        course_code="FIST102",
-        course_name="Data Science Basics",
-        credits=3,
-        semester="T1",
-        department="FIST",
-        description="Explore fundamental concepts in data science.",
-        prerequisite_id=course1.id  # 设定 prerequisite
-    )
-    db.session.add(course2)
     db.session.flush()
+        # Randomly assign completed courses (Term2330) to students
+    term2330_courses = [c for c in courses if c.semester == "Term2330"]
+    term2410_courses = [c for c in courses if c.semester == "Term2410"]
 
-    section3 = Section(course_id=course2.id, name="Lec-A2", type="Lecture", instructor="Dr. Tan",
-                       location="C101", day="Wednesday", start_time=time(9, 0), end_time=time(11, 0), quota=25)
-    section4 = Section(course_id=course2.id, name="Lab-C1", type="Lab", instructor="Mr. Lim",
-                       location="C203", day="Thursday", start_time=time(14, 0), end_time=time(16, 0), quota=20)
-    db.session.add_all([section3, section4])
+    for student in students:
+        completed = random.sample(term2330_courses, random.randint(4, 8))
+        for course in completed:
+            lec_section = random.choice([s for s in course.sections if s.type == "Lecture"])
+            lab_section = random.choice([s for s in course.sections if s.type == "Lab"])
+            db.session.add(Enrollment(student_id=student.id, section_id=lec_section.id))
+            db.session.add(Enrollment(student_id=student.id, section_id=lab_section.id))
 
-    course3 = Course(
-        course_code="FCI201",
-        course_name="Software Engineering Fundamentals",
-        credits=4,
-        semester="T1",
-        department="FCI",
-        description="Introduction to software engineering principles."
-    )
-    db.session.add(course3)
+        # Also register 2-4 current semester courses
+        eligible = random.sample(term2410_courses, random.randint(2, 4))
+        for course in eligible:
+            lec_section = random.choice([s for s in course.sections if s.type == "Lecture"])
+            lab_section = random.choice([s for s in course.sections if s.type == "Lab"])
+            db.session.add(Enrollment(student_id=student.id, section_id=lec_section.id))
+            db.session.add(Enrollment(student_id=student.id, section_id=lab_section.id))
+
     db.session.flush()
-
-    section5 = Section(course_id=course3.id, name="Lec-B1", type="Lecture", instructor="Dr. Ong",
-                       location="E101", day="Thursday", start_time=time(8, 0), end_time=time(10, 0), quota=40)
-    db.session.add(section5)
+        # System Setting
+    if not SystemSetting.query.filter_by(key="open_semester").first():
+        setting = SystemSetting(key="open_semester", value="Term2410")
+        db.session.add(setting)
 
     db.session.commit()
-    return "✅ Demo data reset and reinserted!"
+    return "✅ Massive test data generated successfully!"
+
+
+
+#http://localhost:5000/init-test-data
+
+@main.route("/debug-enrollments/<int:student_id>")
+def debug_enrollments(student_id):
+    result = []
+    enrollments = Enrollment.query.join(Section).filter(Enrollment.student_id == student_id).all()
+    for e in enrollments:
+        section = e.section
+        course = section.course
+        result.append(f"[{course.course_code}] {course.course_name} via {section.name} ({section.type})")
+    return "<br>".join(result) or "❌ No enrollments found"

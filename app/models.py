@@ -88,4 +88,9 @@ class Section(db.Model):
     course = db.relationship("Course", back_populates="sections")
     enrollments = db.relationship("Enrollment", back_populates="section", cascade="all, delete")
 
+# 放在 models.py 最后
+class SystemSetting(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    key = db.Column(db.String(64), unique=True, nullable=False)
+    value = db.Column(db.String(128), nullable=False)
 
