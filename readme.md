@@ -5,6 +5,10 @@ A web-based course enrollment system built with **Python + Flask + SQLite**, des
 
 ---
 
+## 🖼️ Website Homepage
+
+![Homepage Screenshot](screenshot/index.png)
+
 ## ✅ Features (Progress: 70% - )
 
 ### 👨‍🎓 Student Features
@@ -18,6 +22,8 @@ A web-based course enrollment system built with **Python + Flask + SQLite**, des
 - View enrolled courses
 - 📅 **Weekly Timetable View** with visual blocks
 - Drop entire course (with all sections)
+- Enforce **prerequisite check** before allowing course enrollment  
+- Implement **credit hour limit** (e.g., max 18 credit hours)  
 
 ### 🧑‍💼 Admin Features
 - Admin login
@@ -112,8 +118,6 @@ Semester: April 2025
 - [ ] User profile settings  
 
 ### 🧠 Smart Enrollment Logic (Coming Soon)
-- [ ] Enforce **prerequisite check** before allowing course enrollment  
-- [ ] Implement **credit hour limit** (e.g., max 18 credit hours)  
 - [ ] Highlight conflicting sections in Dashboard before selection (conflict prediction system)  
 
 ### 🔍 UI / UX Improvements (Planned)

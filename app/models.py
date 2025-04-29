@@ -56,7 +56,8 @@ class Course(db.Model):
     credits = db.Column(db.Integer)
     semester = db.Column(db.String(64))
     department = db.Column(db.String(64))
-
+    prerequisite_id = db.Column(db.Integer, db.ForeignKey('course.id'))
+    prerequisite = db.relationship("Course", remote_side=[id])
     enrollments = db.relationship('Enrollment', backref='course', lazy=True)
     sections = db.relationship('Section', back_populates='course', cascade='all, delete')
 

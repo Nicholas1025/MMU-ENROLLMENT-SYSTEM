@@ -62,13 +62,42 @@ def dashboard():
         abort(403)
 
     student = current_user
-    courses = Course.query.filter_by(department=student.department).all()
+    selected_semester = request.args.get('semester')
 
+    # 查询所有课程（可选 semester 过滤）
+    course_query = Course.query.filter_by(department=student.department)
+    if selected_semester:
+        course_query = course_query.filter_by(semester=selected_semester)
+    courses = course_query.all()
+
+    # 查询所有可选学期（供下拉菜单用）
+    all_semesters = (
+        db.session.query(Course.semester)
+        .filter_by(department=student.department)
+        .distinct()
+        .order_by(Course.semester)
+        .all()
+    )
+    all_semesters = [s[0] for s in all_semesters]
+
+    # 已注册的 section ID 和对应课程 ID
     enrolled_section_ids = [e.section_id for e in Enrollment.query.filter_by(student_id=student.id).all()]
     enrolled_section_objs = Section.query.filter(Section.id.in_(enrolled_section_ids)).all()
     enrolled_course_ids = list({s.course_id for s in enrolled_section_objs})
 
-    return render_template("dashboard.html", courses=courses, enrolled_course_ids=enrolled_course_ids)
+    # 计算当前学分
+    enrolled_courses = Course.query.filter(Course.id.in_(enrolled_course_ids)).all()
+    total_credits = sum(c.credits for c in enrolled_courses)
+
+    return render_template(
+        "dashboard.html",
+        courses=courses,
+        enrolled_course_ids=enrolled_course_ids,
+        total_credits=total_credits,
+        all_semesters=all_semesters,
+        selected_semester=selected_semester
+    )
+
 
 @main.route("/enroll/<int:course_id>")
 @login_required
@@ -182,27 +211,33 @@ def admin_dashboard():
     form = CourseAddForm()
     courses = Course.query.all()
 
+    form.prerequisite_id.choices = [(0, "None")] + [
+        (c.id, f"{c.course_code} - {c.course_name}") for c in courses
+    ]
+
     if form.validate_on_submit():
-        # ✅ 添加重复课程代码检查
         existing = Course.query.filter_by(course_code=form.course_code.data).first()
         if existing:
             flash("Course code already exists. Please use a unique code.", "danger")
             return redirect(url_for("main.admin_dashboard"))
 
+        prereq_id = form.prerequisite_id.data
         course = Course(
-                course_code=form.course_code.data,
-                course_name=form.course_name.data,
-                credits=form.credits.data,
-                semester=form.semester.data,
-                department=form.department.data,
-                description=form.description.data
-            )
+            course_code=form.course_code.data,
+            course_name=form.course_name.data,
+            credits=form.credits.data,
+            semester=form.semester.data,
+            department=form.department.data,
+            description=form.description.data,
+            prerequisite_id=prereq_id if prereq_id != 0 else None 
+        )
         db.session.add(course)
         db.session.commit()
         flash("Course added!", "success")
         return redirect(url_for("main.admin_dashboard"))
 
     return render_template("admin_dashboard.html", form=form, courses=courses)
+
 
 
 
@@ -234,25 +269,38 @@ def admin_edit(course_id):
     course = Course.query.get_or_404(course_id)
     form = CourseEditForm(obj=course)
 
+    other_courses = Course.query.filter(Course.id != course.id).all()
+    form.prerequisite_id.choices = [(0, "None")] + [
+        (c.id, f"{c.course_code} - {c.course_name}") for c in other_courses
+    ]
+    if request.method == "GET":
+        form.prerequisite_id.data = course.prerequisite_id or 0
+
     if form.validate_on_submit():
         existing = Course.query.filter_by(course_code=form.course_code.data).first()
         if existing and existing.id != course.id:
             flash("Course code already exists.", "danger")
             return redirect(url_for("main.admin_dashboard"))
 
+        # ✅ 先直接更新所有字段，包括 prerequisite_id
         course.course_code = form.course_code.data
         course.course_name = form.course_name.data
         course.credits = form.credits.data
         course.semester = form.semester.data
         course.department = form.department.data
         course.description = form.description.data
-        db.session.commit()
+        
+        # ✅ 这里是正确保存 prerequisite
+        if form.prerequisite_id.data == 0:
+            course.prerequisite_id = None
+        else:
+            course.prerequisite_id = form.prerequisite_id.data
 
+        db.session.commit()
         flash("Course updated!", "success")
         return redirect(url_for("main.admin_dashboard"))
 
     return render_template("course_form.html", form=form, title="Edit Course")
-
 
 
 @main.route("/timetable")
@@ -410,9 +458,25 @@ def course_detail(course_id):
     course = Course.query.get_or_404(course_id)
     lecture_sections = Section.query.filter_by(course_id=course_id, type="Lecture").all()
     student_id = current_user.id
-    enrolled_section_ids = [e.section_id for e in Enrollment.query.filter_by(student_id=student_id).all()]
 
-    return render_template("course_detail.html", course=course, lectures=lecture_sections, enrolled_section_ids=enrolled_section_ids)
+    enrolled_section_ids = [e.section_id for e in Enrollment.query.filter_by(student_id=student_id).all()]
+    
+    # ➡️ 计算当前已修的学分
+    enrolled_course_ids = set()
+    for enrollment in Enrollment.query.filter_by(student_id=student_id).all():
+        if enrollment.section:
+            enrolled_course_ids.add(enrollment.section.course_id)
+    
+    total_credits = db.session.query(db.func.sum(Course.credits)).filter(Course.id.in_(enrolled_course_ids)).scalar() or 0
+
+    return render_template(
+        "course_detail.html",
+        course=course,
+        lectures=lecture_sections,
+        enrolled_section_ids=enrolled_section_ids,
+        total_credits=total_credits  # ✅ 传进去模板
+    )
+
 
 
 @main.route("/course/<int:course_id>/select-tutorial")
@@ -446,10 +510,12 @@ def select_tutorial(course_id):
 def finalize_enrollment(course_id):
     lecture_id = request.form.get("lecture_id", type=int)
     tutorial_id = request.form.get("tutorial_id", type=int)
-
     student_id = current_user.id
 
-    # 防止重复注册
+    # 获取当前选的课程
+    course = Course.query.get_or_404(course_id)
+
+    # ✅ 重复注册检测
     existing = Enrollment.query.join(Section).filter(
         Enrollment.student_id == student_id,
         Section.course_id == course_id
@@ -458,12 +524,33 @@ def finalize_enrollment(course_id):
         flash("You already registered this course.", "danger")
         return redirect(url_for("main.dashboard"))
 
+    # ✅ prerequisite 检查
+    prereq = course.prerequisite
+    if prereq:
+        completed_course_ids = [
+            s.course_id for s in Enrollment.query.join(Section)
+            .filter(Enrollment.student_id == student_id).all()
+        ]
+        if prereq.id not in completed_course_ids:
+            flash(f"Cannot register: Prerequisite {prereq.course_code} - {prereq.course_name} not fulfilled.", "danger")
+            return redirect(url_for("main.dashboard"))
+
+    # ✅ 学分上限检查（20 学分）
+    current_credits = sum(
+        s.course.credits for s in Enrollment.query.join(Section)
+        .filter(Enrollment.student_id == student_id).all()
+    )
+    if current_credits + course.credits > 20:
+        flash(f"Cannot register: Credit limit exceeded. You already have {current_credits} credits.", "danger")
+        return redirect(url_for("main.dashboard"))
+
     # 获取两个 section 对象
     lecture = Section.query.get_or_404(lecture_id)
     tutorial = Section.query.get_or_404(tutorial_id)
 
-    # 时间冲突检测
-    for e in Enrollment.query.filter_by(student_id=student_id).all():
+    # ✅ 时间冲突检测
+    enrolled_sections = Enrollment.query.filter_by(student_id=student_id).all()
+    for e in enrolled_sections:
         existing_sec = Section.query.get(e.section_id)
         if existing_sec.day == lecture.day:
             if not (lecture.end_time <= existing_sec.start_time or lecture.start_time >= existing_sec.end_time):
@@ -474,7 +561,7 @@ def finalize_enrollment(course_id):
                 flash(f"Time conflict with {existing_sec.name} (Tutorial)", "danger")
                 return redirect(url_for("main.dashboard"))
 
-    # 正式写入数据库
+    # ✅ 正式注册
     db.session.add(Enrollment(student_id=student_id, section_id=lecture.id))
     db.session.add(Enrollment(student_id=student_id, section_id=tutorial.id))
     db.session.commit()
@@ -508,8 +595,10 @@ def init_demo():
     from datetime import time
     from .models import Student, Course, Section, Enrollment, db
 
-    # === Create Admin if not exists ===
-    from .models import Admin
+    db.drop_all()
+    db.create_all()
+
+    # === Admin Account ===
     if not Admin.query.filter_by(username="admin").first():
         admin = Admin(username="admin")
         admin.set_password("admin123")
@@ -524,48 +613,61 @@ def init_demo():
         Student(name="Eve Lim", email="eve@student.mmu.edu.my", department="FOB"),
     ]
     for s in students:
-        if not Student.query.filter_by(email=s.email).first():
-            s.set_password("123456")
-            db.session.add(s)
+        s.set_password("123456")
+        db.session.add(s)
+
+    db.session.flush()  # 立即写入，方便后续引用 id
 
     # === Courses & Sections ===
-    if not Course.query.filter_by(course_code="FIST101").first():
-        course1 = Course(
-            course_code="FIST101",
-            course_name="Introduction to AI",
-            credits=3,
-            semester="T1",
-            department="FIST",
-            description="Learn the basics of AI."
-        )
-        db.session.add(course1)
-        db.session.flush()  # Get course1.id
+    course1 = Course(
+        course_code="FIST101",
+        course_name="Introduction to AI",
+        credits=3,
+        semester="T1",
+        department="FIST",
+        description="Learn the basics of Artificial Intelligence."
+    )
+    db.session.add(course1)
+    db.session.flush()
 
-        db.session.add_all([
-            Section(course_id=course1.id, name="Lec-A1", type="Lecture", instructor="Dr. Ling", location="A101",
-                    day="Monday", start_time=time(9, 0), end_time=time(11, 0), quota=30),
-            Section(course_id=course1.id, name="Tut-B1", type="Tutorial", instructor="Ms. Tan", location="B202",
-                    day="Tuesday", start_time=time(10, 0), end_time=time(11, 0), quota=20),
-        ])
+    section1 = Section(course_id=course1.id, name="Lec-A1", type="Lecture", instructor="Dr. Ling",
+                       location="A101", day="Monday", start_time=time(9, 0), end_time=time(11, 0), quota=30)
+    section2 = Section(course_id=course1.id, name="Tut-B1", type="Tutorial", instructor="Ms. Tan",
+                       location="B202", day="Tuesday", start_time=time(10, 0), end_time=time(11, 0), quota=20)
+    db.session.add_all([section1, section2])
 
-    if not Course.query.filter_by(course_code="FIST102").first():
-        course2 = Course(
-            course_code="FIST102",
-            course_name="Data Science Basics",
-            credits=3,
-            semester="T1",
-            department="FIST",
-            description="Explore fundamental concepts in data science."
-        )
-        db.session.add(course2)
-        db.session.flush()
+    course2 = Course(
+        course_code="FIST102",
+        course_name="Data Science Basics",
+        credits=3,
+        semester="T1",
+        department="FIST",
+        description="Explore fundamental concepts in data science.",
+        prerequisite_id=course1.id  # 设定 prerequisite
+    )
+    db.session.add(course2)
+    db.session.flush()
 
-        db.session.add_all([
-            Section(course_id=course2.id, name="Lec-A2", type="Lecture", instructor="Dr. Tan", location="C101",
-                    day="Wednesday", start_time=time(9, 0), end_time=time(11, 0), quota=25),
-            Section(course_id=course2.id, name="Lab-C1", type="Lab", instructor="Mr. Lim", location="C203",
-                    day="Thursday", start_time=time(14, 0), end_time=time(16, 0), quota=20),
-        ])
+    section3 = Section(course_id=course2.id, name="Lec-A2", type="Lecture", instructor="Dr. Tan",
+                       location="C101", day="Wednesday", start_time=time(9, 0), end_time=time(11, 0), quota=25)
+    section4 = Section(course_id=course2.id, name="Lab-C1", type="Lab", instructor="Mr. Lim",
+                       location="C203", day="Thursday", start_time=time(14, 0), end_time=time(16, 0), quota=20)
+    db.session.add_all([section3, section4])
+
+    course3 = Course(
+        course_code="FCI201",
+        course_name="Software Engineering Fundamentals",
+        credits=4,
+        semester="T1",
+        department="FCI",
+        description="Introduction to software engineering principles."
+    )
+    db.session.add(course3)
+    db.session.flush()
+
+    section5 = Section(course_id=course3.id, name="Lec-B1", type="Lecture", instructor="Dr. Ong",
+                       location="E101", day="Thursday", start_time=time(8, 0), end_time=time(10, 0), quota=40)
+    db.session.add(section5)
 
     db.session.commit()
-    return "✅ Demo data inserted!"
+    return "✅ Demo data reset and reinserted!"

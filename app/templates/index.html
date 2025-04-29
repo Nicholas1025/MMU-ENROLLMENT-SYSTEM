@@ -1,6 +1,67 @@
 {% extends "base.html" %}
-{% block title %}Welcome{% endblock %}
+{% block title %}MMU Enrollment System{% endblock %}
 {% block content %}
-<h2>Welcome to MMU Enrollment System</h2>
-<p>Please <a href="{{ url_for('main.login') }}">Login</a> or <a href="{{ url_for('main.register') }}">Register</a> to continue.</p>
+
+<style>
+    .hero-harvard {
+        position: relative;
+        height: 100vh;
+        background: url("{{ url_for('static', filename='image/hero.jpg') }}") no-repeat center center / cover;
+        color: white;
+        font-family: 'Playfair Display', serif;
+    }
+
+    .hero-overlay {
+        position: absolute;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        z-index: 1;
+    }
+
+    .hero-content {
+        position: relative;
+        z-index: 2;
+        text-align: center;
+        top: 50%;
+        transform: translateY(-50%);
+        padding: 0 20px;
+    }
+
+    .hero-content h1 {
+        font-size: 4.2rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+    }
+
+    .hero-content p {
+        font-size: 1.25rem;
+        max-width: 800px;
+        margin: 0 auto 2.5rem auto;
+        line-height: 1.8;
+    }
+
+    .btn-hero {
+        font-size: 1.1rem;
+        padding: 12px 30px;
+        border-radius: 40px;
+        margin: 0 10px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-hero:hover {
+        transform: scale(1.05);
+        opacity: 0.9;
+    }
+</style>
+
+<section class="hero-harvard">
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+        <h1>MMU Enrollment System</h1>
+        <p>At Multimedia University (MMU), we empower students with cutting-edge education, fostering innovation and leadership for a better future. From AI to Business Intelligence, our programs shape minds that change the world.</p>
+        <a href="{{ url_for('main.login') }}" class="btn btn-primary btn-hero">Login</a>
+        <a href="{{ url_for('main.register') }}" class="btn btn-outline-light btn-hero">Register</a>
+    </div>
+</section>
 {% endblock %}

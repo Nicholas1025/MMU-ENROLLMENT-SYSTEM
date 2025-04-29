@@ -36,6 +36,12 @@
         </div>
     </div>
 
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            {{ form.prerequisite_id.label }} {{ form.prerequisite_id(class="form-select") }}
+        </div>
+    </div>
+
     <div class="mt-2">
         
         <a href="{{ url_for('main.admin_add_section') }}" class="btn btn-sm btn-outline-info"> ➕ Add Section </a>
@@ -54,6 +60,7 @@
             <th>Credits</th>
             <th>Semester</th>
             <th>Description</th>
+            <th>Prerequisite</th> <!-- 🆕 新加 -->
             <th>Actions</th>
         </tr>
     </thead>
@@ -66,6 +73,13 @@
             <td>{{ c.credits }}</td>
             <td>{{ c.semester }}</td>
             <td class="text-muted">{{ c.description[:50] }}{% if c.description|length > 50 %}...{% endif %}</td>
+            <td>
+                {% if c.prerequisite %}
+                    {{ c.prerequisite.course_code }} - {{ c.prerequisite.course_name }}
+                {% else %}
+                    None
+                {% endif %}
+            </td>
             <td>
                 <a href="{{ url_for('main.admin_edit', course_id=c.id) }}" class="btn btn-sm btn-outline-primary">Edit</a>
                 <a href="{{ url_for('main.admin_delete', course_id=c.id) }}" class="btn btn-sm btn-outline-danger">Delete</a>

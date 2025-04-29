@@ -1,14 +1,33 @@
 {% extends "base.html" %}
 {% block title %}Dashboard{% endblock %}
 {% block content %}
+
+
+
 <h2>Available Courses ({{ courses|length }})</h2>
+
+<!-- ✅ Filter by Semester -->
+<form method="GET" action="{{ url_for('main.dashboard') }}" class="mb-4 d-flex align-items-center gap-2">
+    <label for="semester" class="form-label mb-0">Filter by Semester:</label>
+    <select class="form-select w-auto" id="semester" name="semester" onchange="this.form.submit()">
+        <option value="">All</option>
+        {% for s in all_semesters %}
+            <option value="{{ s }}" {% if s == selected_semester %}selected{% endif %}>{{ s }}</option>
+        {% endfor %}
+    </select>
+</form>
+
+<h5 class="text-success mb-3">📚 Current Registered Credits: {{ total_credits }} / 20</h5>
+
 <table class="table table-bordered">
     <thead class="table-light">
         <tr>
             <th>Code</th>
             <th>Name</th>
+            <th>Credits</th>
+            <th>Semester</th>
             <th>Department</th>
-            <th>Action</th>  <!-- ✅ 只放表头文字，不写逻辑 -->
+            <th>Action</th>
         </tr>
     </thead>
     <tbody>
@@ -16,9 +35,9 @@
         <tr>
             <td>{{ course.course_code }}</td>
             <td>{{ course.course_name }}</td>
-
+            <td>{{ course.credits }}</td>
+            <td>{{ course.semester }}</td>
             <td>{{ course.department }}</td>
-
             <td>
                 {% if course.id in enrolled_course_ids %}
                     <a href="{{ url_for('main.drop', course_id=course.id) }}" class="btn btn-sm btn-outline-danger">Drop</a>
@@ -33,4 +52,5 @@
 
 <a href="{{ url_for('main.my_courses') }}" class="btn btn-outline-primary mt-3">View My Courses</a>
 <a href="{{ url_for('main.timetable') }}" class="btn btn-outline-info mt-3">View My Timetable</a>
+
 {% endblock %}

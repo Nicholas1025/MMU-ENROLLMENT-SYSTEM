@@ -1,8 +1,9 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, IntegerField, TextAreaField, SelectField, TimeField
-from wtforms.validators import DataRequired, Email, EqualTo, Length, ValidationError
+from wtforms.validators import DataRequired, Email, EqualTo, Length, ValidationError, Optional
+from wtforms import SelectField
 
-DEPARTMENTS = [("FIST", "FIST"), ("FCI", "FCI"), ("FOB", "FOB")]
+DEPARTMENTS = [("FIST", "FIST"), ("FCI", "FCI"), ("FOB", "FOB")]    
 
 class StudentRegisterForm(FlaskForm):
     name = StringField("Full Name", validators=[DataRequired()])
@@ -30,6 +31,7 @@ class AdminLoginForm(FlaskForm):
 
 class CourseAddForm(FlaskForm):
     course_code = StringField("Course Code", validators=[DataRequired()])
+    prerequisite_id = SelectField("Prerequisite Course", coerce=int, choices=[], validators=[Optional()])
     course_name = StringField("Course Name", validators=[DataRequired()])
     credits = IntegerField("Credits", validators=[DataRequired()])
     semester = StringField("Semester", validators=[DataRequired()])
@@ -38,9 +40,12 @@ class CourseAddForm(FlaskForm):
     ], validators=[DataRequired()])
     description = TextAreaField("Description", validators=[DataRequired()])
     submit = SubmitField("Add Course")
+    
 
 
 class CourseEditForm(CourseAddForm):
+    prerequisite_id = SelectField("Prerequisite Course", coerce=int, choices=[], validators=[Optional()])
+
     submit = SubmitField("Update Course")
 
 

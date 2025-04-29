@@ -2,7 +2,16 @@
 {% block title %}Course Details{% endblock %}
 {% block content %}
 <h2>{{ course.course_code }} - {{ course.course_name }}</h2>
-<p><strong>Department:</strong> {{ course.department }} | <strong>Credits:</strong> {{ course.credits }}</p>
+<p>
+  <strong>Department:</strong> {{ course.department }} |
+  <strong>Credits:</strong> {{ course.credits }}<br>
+  {% if course.prerequisite %}
+    <strong>Prerequisite:</strong> {{ course.prerequisite.course_code }} - {{ course.prerequisite.course_name }}
+  {% else %}
+    <strong>Prerequisite:</strong> None
+  {% endif %}
+</p>
+
 
 <h4>Sections</h4>
 <table class="table table-bordered">
