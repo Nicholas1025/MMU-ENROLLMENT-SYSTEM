@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, IntegerField, TextAreaField, SelectField, TimeField
-from wtforms.validators import DataRequired, Email, EqualTo, Length, ValidationError, Optional
+from wtforms.validators import DataRequired, Email, EqualTo, Length, ValidationError, Optional, NumberRange
 from wtforms import SelectField
 
 DEPARTMENTS = [("FIST", "FIST"), ("FCI", "FCI"), ("FOB", "FOB")]    
@@ -67,4 +67,15 @@ class SectionForm(FlaskForm):
 class SemesterSettingForm(FlaskForm):
     semester = SelectField("Open Semester", choices=[], validators=[DataRequired()])
     submit = SubmitField("Save Semester")
+
+
+class StudentEditForm(FlaskForm):
+    name = StringField("Name", validators=[DataRequired()])
+    email = StringField("Email", validators=[DataRequired(), Email()])
+    department = StringField("Department", validators=[DataRequired()])
+    scholarship_percentage = IntegerField("Scholarship (%)", validators=[NumberRange(min=0, max=100)])
+    submit = SubmitField("Update Student")
+
+from wtforms import SelectField
+
 

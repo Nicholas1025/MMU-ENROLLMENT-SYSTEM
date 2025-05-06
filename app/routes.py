@@ -14,6 +14,9 @@ from .forms import (
 
 from flask import make_response
 
+from .forms import StudentEditForm
+
+
 main = Blueprint("main", __name__)
 
 
@@ -103,41 +106,61 @@ def dashboard():
     ).distinct().all()
     completed_course_ids = {c.id for c in completed_courses}
 
-    # 当前学分
+    # 累计完成的历史学分（无上限）
     total_credits = sum(c.credits for c in completed_courses)
 
-    # 获取当前学期所有课程
+    # 当前学期的所有课程
     all_courses = Course.query.filter_by(department=student.department).all()
 
     eligible_courses = []
     locked_courses = []
     for course in all_courses:
         if course.id in completed_course_ids:
-            continue  # 已修，跳过
+            continue
         if course.semester != open_semester:
             locked_courses.append((course, "Not offered this semester"))
             continue
         if course.prerequisite and course.prerequisite.id not in completed_course_ids:
             locked_courses.append((course, f"Missing prerequisite: {course.prerequisite.course_code}"))
             continue
-        if course.course_code.startswith("FYP") and total_credits < 60:
+        if course.course_name.startswith("FYP") and total_credits < 60:
             locked_courses.append((course, "Requires ≥ 60 credit hours"))
             continue
         eligible_courses.append(course)
 
-        # 获取当前学生已注册的所有 section
+    # ✅ 正确：在循环后面计算当前学期的注册学分
+    current_enrollments = Enrollment.query.join(Section).join(Course).filter(
+        Enrollment.student_id == student_id,
+        Course.semester == open_semester
+    ).all()
+
+    seen_course_ids = set()
+    current_semester_credits = 0
+    for e in current_enrollments:
+        course = e.section.course
+        if course and course.id not in seen_course_ids:
+            current_semester_credits += course.credits
+            seen_course_ids.add(course.id)
+
+
+
+
+    max_credits = 20  # 可未来配置为 SystemSetting 获取
+
+    # 获取学生已注册的课程 id
     enrolled_section_ids = [e.section_id for e in Enrollment.query.filter_by(student_id=student_id).all()]
     enrolled_section_objs = Section.query.filter(Section.id.in_(enrolled_section_ids)).all()
     enrolled_course_ids = list({s.course_id for s in enrolled_section_objs})
-
 
     return render_template("student/dashboard.html",
         eligible_courses=eligible_courses,
         locked_courses=locked_courses,
         completed_courses=completed_courses,
         total_credits=total_credits,
+        current_semester_credits=current_semester_credits,
+        max_credits=max_credits,
         open_semester=open_semester,
-        enrolled_course_ids=enrolled_course_ids  # ✅ 添加这里
+        enrolled_course_ids=enrolled_course_ids
     )
 
 
@@ -184,7 +207,10 @@ def enroll(course_id):
     course_to_add = Course.query.get_or_404(course_id)
 
     # ✅ 已选课程检测
-    existing = Enrollment.query.filter_by(student_id=student_id, course_id=course_id).first()
+    existing = Enrollment.query.join(Section).filter(
+    Enrollment.student_id == student_id,
+    Section.course_id == course_id
+    ).first()
     if existing:
         flash("You already enrolled in this course.", "warning")
         return redirect(url_for("main.dashboard"))
@@ -255,12 +281,35 @@ def course_detail(course_id):
     
     total_credits = db.session.query(db.func.sum(Course.credits)).filter(Course.id.in_(enrolled_course_ids)).scalar() or 0
 
+    # 👇 补上计算当前学期学分 & 最大学分
+    setting = SystemSetting.query.filter_by(key="open_semester").first()
+    open_semester = setting.value if setting else "Term2410"
+
+    current_enrollments = Enrollment.query.join(Section).join(Course).filter(
+        Enrollment.student_id == current_user.id,
+        Course.semester == open_semester
+    ).all()
+
+    # ✅ 避免重复计入相同 course 的 credits
+    seen_course_ids = set()
+    current_semester_credits = 0
+    for e in current_enrollments:
+        c = e.section.course  # ✅ 避免覆盖外部的 `course`
+        if c and c.id not in seen_course_ids:
+            current_semester_credits += c.credits
+            seen_course_ids.add(c.id)
+
+    max_credits = 20
+
+
     return render_template(
         "student/course_detail.html",
         course=course,
         lectures=lecture_sections,
         enrolled_section_ids=enrolled_section_ids,
-        total_credits=total_credits  # ✅ 传进去模板
+        total_credits=total_credits,
+        current_semester_credits=current_semester_credits,  # ✅ 新增
+        max_credits=max_credits  # ✅ 新增
     )
 
 @main.route("/course/<int:course_id>/select-tutorial")
@@ -331,6 +380,57 @@ def profile():
         total_completed_credits=total_completed_credits,
         current_sections=current,
         completed_courses=completed_grouped.values()
+    )
+
+@main.route("/finance")
+@login_required
+def finance():
+    if not current_user.is_student:
+        abort(403)
+
+    student_id = current_user.id
+
+    # 当前开放学期
+    setting = SystemSetting.query.filter_by(key="open_semester").first()
+    open_semester = setting.value if setting else "Term2410"
+
+    # 获取当前学期的注册课程 Section
+    enrollments = Enrollment.query.join(Section).join(Section.course).filter(
+        Enrollment.student_id == student_id,
+        Course.semester == open_semester
+    ).all()
+
+    # 计算每门课程只算一次学费（避免重复 Lecture + Lab）
+    seen_course_ids = set()
+    tuition_fees = []
+    credit_hour_fee = 300
+    total_credits = 0
+
+    for e in enrollments:
+        course = e.section.course
+        if course.id not in seen_course_ids:
+            seen_course_ids.add(course.id)
+            tuition_fees.append({
+                "course": course,
+                "credits": course.credits,
+                "amount": course.credits * credit_hour_fee
+            })
+            total_credits += course.credits
+
+    total_fee = total_credits * credit_hour_fee
+
+    # 奖学金百分比（默认 0%，可视需求改为数据库字段）
+    scholarship_percentage = current_user.scholarship_percentage or 0
+    scholarship_amount = total_fee * (scholarship_percentage / 100)
+    net_total = total_fee - scholarship_amount
+
+    return render_template("student/finance.html",
+        tuition_fees=tuition_fees,
+        total_credits=total_credits,
+        total_fee=total_fee,
+        scholarship_percentage=scholarship_percentage,
+        scholarship_amount=scholarship_amount,
+        net_total=net_total
     )
 
 
@@ -541,18 +641,42 @@ def admin_edit_section(section_id):
     form.course_id.data = section.course_id   
 
     if form.validate_on_submit():
+        section.course_id = form.course_id.data
+        section.name = form.name.data
+        section.type = form.type.data
         section.instructor = form.instructor.data
         section.location = form.location.data
         section.day = form.day_of_week.data
         section.start_time = form.start_time.data
         section.end_time = form.end_time.data
-
-
+        section.quota = form.quota.data
         db.session.commit()
         flash("Section updated!", "success")
         return redirect(url_for('main.admin_dashboard'))
 
+
     return render_template('admin/section_form.html', form=form, title="Edit Section")
+
+@main.route("/admin/student/<int:student_id>/edit", methods=["GET", "POST"])
+@login_required
+def admin_edit_student(student_id):
+    if not current_user.is_admin:
+        abort(403)
+
+    student = Student.query.get_or_404(student_id)
+    form = StudentEditForm(obj=student)
+
+    if form.validate_on_submit():
+        student.name = form.name.data
+        student.email = form.email.data
+        student.department = form.department.data
+        student.scholarship_percentage = form.scholarship_percentage.data
+        db.session.commit()
+        flash("Student updated!", "success")
+        return redirect(url_for("main.admin_all_students"))
+
+    return render_template("admin/edit_student.html", form=form, student=student)
+
 
 @main.route("/admin/course/<int:course_id>")
 @login_required
@@ -589,13 +713,15 @@ def finalize_enrollment(course_id):
     course = Course.query.get_or_404(course_id)
 
     # ✅ 重复注册检测
-    existing = Enrollment.query.join(Section).filter(
+# ✅ 是否已注册该课程（无论哪个 section）
+    existing_course = Enrollment.query.join(Section).filter(
         Enrollment.student_id == student_id,
         Section.course_id == course_id
     ).first()
-    if existing:
+    if existing_course:
         flash("You already registered this course.", "danger")
         return redirect(url_for("main.dashboard"))
+
 
     # ✅ prerequisite 检查
     prereq = course.prerequisite
@@ -639,6 +765,17 @@ def finalize_enrollment(course_id):
     db.session.commit()
     flash("Course registered successfully!", "success")
     return redirect(url_for("main.dashboard"))
+
+@main.route("/debug-courses")
+def debug_courses():
+    output = []
+    for code in ["FIST0001", "FIST0002", "FIST0003"]:
+        course = Course.query.filter_by(course_code=code).first()
+        if course:
+            output.append(f"{course.course_code}: ID={course.id}")
+        else:
+            output.append(f"{code} not found.")
+    return "<br>".join(output)
 
 @main.route("/change_section/<int:section_id>")
 @login_required
@@ -690,32 +827,36 @@ def admin_settings():
 
     return render_template("admin/settings.html", form=form)
 
+
+@main.route("/admin/students")
+@login_required
+def admin_all_students():
+    if not current_user.is_admin:
+        abort(403)
+    students = Student.query.all()
+    return render_template("admin/all_students.html", students=students)
+
+
 #=================== Admin End =======================
 
 #=================== Database Start =======================
 @main.route("/init-test-data")
 def init_test_data():
     from datetime import time
-    import random
-
     db.drop_all()
     db.create_all()
 
-    # Create Admin
+    # Admin
     admin = Admin(username="admin")
     admin.set_password("admin123")
     db.session.add(admin)
 
-    # Create Students
-    student_names = ["Alice Lee", "Bob Tan", "Chloe Wong", "Daniel Ng", "Eve Lim",
-                     "Frank Goh", "Grace Chen", "Henry Teo", "Ivy Ng", "Jack Lim",
-                     "Kelly Tan", "Leo Ong", "Mia Tan", "Nathan Ng", "Olivia Lee",
-                     "Peter Wong", "Queenie Tan", "Ryan Goh", "Sophia Teo", "Thomas Lim"]
+    # 3 Students
     students = []
-    for idx, name in enumerate(student_names):
+    for i in range(3):
         student = Student(
-            name=name,
-            email=f"student{idx+1}@student.mmu.edu.my",
+            name=f"Student {i+1}",
+            email=f"student{i+1}@student.mmu.edu.my",
             department="FIST"
         )
         student.set_password("123456")
@@ -723,79 +864,82 @@ def init_test_data():
         students.append(student)
 
     db.session.flush()
-        # Create Courses (15 courses with prerequisites)
+
+    # Courses
     courses = []
-    for i in range(1, 16):
-        course = Course(
-            course_code=f"FIST{i:04}",
-            course_name=f"Course {i}",
-            credits=3 if i < 14 else 6,  # 最后两门当成 FYP 类 6学分
-            semester="Term2330" if i <= 8 else "Term2410",
-            department="FIST",
-            description=f"This is Course {i}.",
-            prerequisite_id=courses[i-2].id if i > 1 else None  # 每门课前一门做 prerequisite
-        )
-        db.session.add(course)
-        db.session.flush()
-        courses.append(course)
 
-        # Create Sections for each course
-        for j in range(2):  # 2 Lectures
-            section = Section(
-                course_id=course.id,
-                name=f"Lec-{i}-{j+1}",
-                type="Lecture",
-                instructor=f"Dr. {chr(65+i)}{j+1}",
-                location=f"A{i}{j+1}01",
-                day=random.choice(["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]),
-                start_time=time(random.randint(8,15), 0),
-                end_time=time(random.randint(16,18), 0),
-                quota=100
-            )
-            db.session.add(section)
-        for j in range(2):  # 2 Labs
-            section = Section(
-                course_id=course.id,
-                name=f"Lab-{i}-{j+1}",
-                type="Lab",
-                instructor=f"Ms. {chr(75+i)}{j+1}",
-                location=f"B{i}{j+1}02",
-                day=random.choice(["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]),
-                start_time=time(random.randint(8,15), 0),
-                end_time=time(random.randint(16,18), 0),
-                quota=40
-            )
-            db.session.add(section)
+    c1 = Course(course_code="FIST0001", course_name="Intro to Programming", credits=3,
+                semester="Term2410", department="FIST", description="Basic programming")
+    db.session.add(c1)
+    db.session.flush()
+    courses.append(c1)
+
+    c2 = Course(course_code="FIST0002", course_name="Data Structures", credits=3,
+                semester="Term2410", department="FIST", description="Has prerequisite", prerequisite_id=c1.id)
+    db.session.add(c2)
+    db.session.flush()
+    courses.append(c2)
+
+    c3 = Course(course_code="FIST0003", course_name="Computer Networks", credits=3,
+                semester="Term2410", department="FIST", description="Networking basics")
+    db.session.add(c3)
+    courses.append(c3)
+
+    c4 = Course(course_code="FIST0004", course_name="FYP Project", credits=6,
+                semester="Term2410", department="FIST", description="Final Year Project")
+    db.session.add(c4)
+    courses.append(c4)
+
+    c5 = Course(course_code="FIST0005", course_name="Operating Systems", credits=3,
+                semester="Term2410", department="FIST", description="OS Concepts")
+    db.session.add(c5)
+    courses.append(c5)
+
+    c6 = Course(course_code="FIST0006", course_name="Software Engineering", credits=3,
+                semester="Term2410", department="FIST", description="SE Fundamentals")
+    db.session.add(c6)
+    courses.append(c6)
 
     db.session.flush()
-        # Randomly assign completed courses (Term2330) to students
-    term2330_courses = [c for c in courses if c.semester == "Term2330"]
-    term2410_courses = [c for c in courses if c.semester == "Term2410"]
 
-    for student in students:
-        completed = random.sample(term2330_courses, random.randint(4, 8))
-        for course in completed:
-            lec_section = random.choice([s for s in course.sections if s.type == "Lecture"])
-            lab_section = random.choice([s for s in course.sections if s.type == "Lab"])
-            db.session.add(Enrollment(student_id=student.id, section_id=lec_section.id))
-            db.session.add(Enrollment(student_id=student.id, section_id=lab_section.id))
-
-        # Also register 2-4 current semester courses
-        eligible = random.sample(term2410_courses, random.randint(2, 4))
-        for course in eligible:
-            lec_section = random.choice([s for s in course.sections if s.type == "Lecture"])
-            lab_section = random.choice([s for s in course.sections if s.type == "Lab"])
-            db.session.add(Enrollment(student_id=student.id, section_id=lec_section.id))
-            db.session.add(Enrollment(student_id=student.id, section_id=lab_section.id))
+    # Add Sections: 1 Lecture + 1 Lab for each
+    for course in courses:
+        lec = Section(course_id=course.id, name=f"{course.course_code}-LEC", type="Lecture",
+                      instructor="Dr. A", location="A101", day="Tuesday",
+                      start_time=time(10, 0), end_time=time(12, 0), quota=50)
+        lab = Section(course_id=course.id, name=f"{course.course_code}-LAB", type="Lab",
+                      instructor="Ms. B", location="B202", day="Wednesday",
+                      start_time=time(14, 0), end_time=time(16, 0), quota=30)
+        db.session.add(lec)
+        db.session.add(lab)
 
     db.session.flush()
-        # System Setting
+
+    # Assign some completed courses to students
+    # Let student 1 have 60 credits completed (for FYP test)
+    for course in courses[:5]:
+        lec = Section.query.filter_by(course_id=course.id, type="Lecture").first()
+        lab = Section.query.filter_by(course_id=course.id, type="Lab").first()
+        db.session.add(Enrollment(student_id=students[0].id, section_id=lec.id))
+        db.session.add(Enrollment(student_id=students[0].id, section_id=lab.id))
+
+    # Let student 2 only completed c1 (for prerequisite test)
+    lec1 = Section.query.filter_by(course_id=c1.id, type="Lecture").first()
+    lab1 = Section.query.filter_by(course_id=c1.id, type="Lab").first()
+    db.session.add(Enrollment(student_id=students[1].id, section_id=lec1.id))
+    db.session.add(Enrollment(student_id=students[1].id, section_id=lab1.id))
+
+    # student 3 has no completed course (for error cases)
+    db.session.flush()
+
+    # System setting
     if not SystemSetting.query.filter_by(key="open_semester").first():
         setting = SystemSetting(key="open_semester", value="Term2410")
         db.session.add(setting)
 
     db.session.commit()
-    return "✅ Massive test data generated successfully!"
+    return "✅ Test data initialized with 3 students and 6 courses for Term2410."
+
 
 
 

@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Financial Summary{% endblock %}
+{% block content %}
+<h2>📄 Financial Summary</h2>
+<hr>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Course</th>
+            <th>Credits</th>
+            <th>Amount (RM)</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in tuition_fees %}
+        <tr>
+            <td>{{ loop.index }}</td>
+            <td>{{ item.course.course_code }} - {{ item.course.course_name }}</td>
+            <td>{{ item.credits }}</td>
+            <td>RM {{ item.amount }}</td>
+        </tr>
+        {% endfor %}
+        <tr class="table-warning">
+            <td colspan="3" class="text-end"><strong>Total Tuition</strong></td>
+            <td><strong>RM {{ total_fee }}</strong></td>
+        </tr>
+        {% if scholarship_percentage > 0 %}
+        <tr class="table-success">
+            <td colspan="3" class="text-end">Scholarship ({{ scholarship_percentage }}%)</td>
+            <td>- RM {{ scholarship_amount }}</td>
+        </tr>
+        {% endif %}
+        <tr class="table-info">
+            <td colspan="3" class="text-end"><strong>Net Payable</strong></td>
+            <td><strong>RM {{ net_total }}</strong></td>
+        </tr>
+    </tbody>
+</table>
+
+<a href="{{ url_for('main.dashboard') }}" class="btn btn-outline-secondary mt-3">← Back to Dashboard</a>
+{% endblock %}

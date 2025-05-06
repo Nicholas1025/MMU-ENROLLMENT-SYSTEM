@@ -10,7 +10,7 @@ class Student(UserMixin, db.Model):
     email = db.Column(db.String(120), unique=True)
     department = db.Column(db.String(64))
     password_hash = db.Column(db.String(128))
-
+    scholarship_percentage = db.Column(db.Integer, default=0)
     enrollments = db.relationship('Enrollment', backref='student', lazy=True)
 
     def set_password(self, password):

@@ -4,7 +4,9 @@
   <meta charset="UTF-8">
   <title>{% block title %}MMU Enrollment System{% endblock %}</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+
   <style>
     body {
       margin: 0;
@@ -12,7 +14,7 @@
       min-height: 100vh;
       display: flex;
       flex-direction: column;
-      font-family: 'Playfair Display', serif;
+      font-family: 'Inter', sans-serif;
       background-color: transparent;
     }
 
@@ -82,10 +84,12 @@
         </span>
         {% if current_user.is_admin %}
           <a class="btn btn-nav" href="{{ url_for('main.admin_dashboard') }}">Dashboard</a>
+          <a class="btn btn-nav" href="{{ url_for('main.admin_all_students') }}">All Students</a>
           <a class="btn btn-nav" href="{{ url_for('main.admin_logout') }}">Logout</a>
         {% elif current_user.is_student %}
           <a class="btn btn-nav" href="{{ url_for('main.dashboard') }}">Dashboard</a>
           <a class="btn btn-nav" href="{{ url_for('main.profile') }}">My Profile</a>
+          <a class="btn btn-nav" href="{{ url_for('main.finance') }}">Finance</a>
           <a class="btn btn-nav" href="{{ url_for('main.logout') }}">Logout</a>
         {% endif %}
       {% else %}

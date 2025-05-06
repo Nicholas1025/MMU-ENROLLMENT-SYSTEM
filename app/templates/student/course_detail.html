@@ -4,6 +4,7 @@
 <h2>{{ course.course_code }} - {{ course.course_name }}</h2>
 <p><strong>Credits:</strong> {{ course.credits }} | <strong>Semester:</strong> {{ course.semester }}</p>
 <p><strong>Department:</strong> {{ course.department }}</p>
+<p style="color:red;"><strong>DEBUG Course ID:</strong> {{ course.id }}</p>
 <hr>
 
 <h4>Available Lecture Sections</h4>
@@ -37,7 +38,7 @@
                 {% if section.id in enrolled_section_ids %}
                     <span class="text-muted">Already Enrolled</span>
                     <a href="{{ url_for('main.change_section', section_id=section.id) }}" class="btn btn-sm btn-outline-primary ms-2">Change</a>
-                {% elif total_credits + course.credits > 20 %}
+                {% elif current_semester_credits + course.credits > max_credits %} 
                     <button class="btn btn-sm btn-secondary" disabled>Credit Limit Exceeded</button>
                 {% else %}
                     <a href="{{ url_for('main.select_tutorial', course_id=course.id, lecture_id=section.id) }}" class="btn btn-sm btn-primary">Select</a>
