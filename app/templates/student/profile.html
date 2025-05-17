@@ -8,7 +8,9 @@
 <p><strong>Email:</strong> {{ student.email }}</p>
 <p><strong>Department:</strong> {{ student.department }}</p>
 <p><strong>Open Semester:</strong> {{ open_semester }}</p>
-<p><strong>Completed Credits:</strong> {{ total_completed_credits }}</p>
+<p><strong>Completed Credits (from courses):</strong> {{ total_completed_credits }}</p>
+<p><strong>Transferred Credits:</strong> {{ transfer_credits }}</p>
+<p><strong>Total Completed Credits (incl. transfer):</strong> <span class="text-success fw-bold">{{ total_with_transfer }}</span></p>
 
 <hr>
 
@@ -50,6 +52,24 @@
 </table>
 {% else %}
 <p class="text-muted">No completed courses yet.</p>
+{% endif %}
+<hr>
+<h4>📄 Transferred Credits</h4>
+{% if credit_transfers %}
+<table class="table table-bordered">
+  <thead><tr><th>Course</th><th>Credits</th><th>Reason</th></tr></thead>
+  <tbody>
+    {% for ct in credit_transfers %}
+    <tr>
+      <td>{{ ct.course_code }} - {{ ct.course_name }}</td>
+      <td>{{ ct.credits }}</td>
+      <td>{{ ct.reason or "—" }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p class="text-muted">No transferred credits.</p>
 {% endif %}
 
 {% endblock %}

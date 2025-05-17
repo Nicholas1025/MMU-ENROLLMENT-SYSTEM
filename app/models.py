@@ -67,10 +67,17 @@ class Enrollment(db.Model):
     student_id = db.Column(db.Integer, db.ForeignKey('student.id'))
     course_id = db.Column(db.Integer, db.ForeignKey('course.id'))
     section_id = db.Column(db.Integer, db.ForeignKey('section.id'), nullable=False)
-
     section = db.relationship("Section", back_populates="enrollments")  # ✅ 必加
 
+class CreditTransfer(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    student_id = db.Column(db.Integer, db.ForeignKey("student.id"), nullable=False)
+    course_code = db.Column(db.String(20), nullable=False)
+    course_name = db.Column(db.String(100), nullable=False)
+    credits = db.Column(db.Integer, nullable=False)
+    reason = db.Column(db.Text, nullable=True)
 
+    student = db.relationship("Student", backref="credit_transfers")
 
 
 class Section(db.Model):

@@ -5,11 +5,11 @@ from flask_login import (
 from flask_wtf.csrf import generate_csrf
 
 from .models import (
-    db, Student, Admin, Course, Section, Enrollment, SystemSetting
+    db, Student, Admin, Course, Section, Enrollment, SystemSetting, CreditTransfer
 )
 from .forms import (
     StudentRegisterForm, StudentLoginForm, AdminLoginForm,
-    CourseAddForm, CourseEditForm, SectionForm, SemesterSettingForm
+    CourseAddForm, CourseEditForm, SectionForm, SemesterSettingForm, ForgotPasswordForm, CreditTransferForm
 )
 
 from flask import make_response
@@ -374,12 +374,21 @@ def profile():
 
     total_completed_credits = sum(c["course"].credits for c in completed_grouped.values())
 
+    # ✅ 获取 credit transfer 数据
+    credit_transfers = student.credit_transfers
+    transfer_credits = sum(ct.credits for ct in credit_transfers)
+
+    total_with_transfer = total_completed_credits + transfer_credits
+
     return render_template("student/profile.html",
         student=student,
         open_semester=open_semester,
-        total_completed_credits=total_completed_credits,
         current_sections=current,
-        completed_courses=completed_grouped.values()
+        completed_courses=completed_grouped.values(),
+        total_completed_credits=total_completed_credits,
+        credit_transfers=credit_transfers,
+        transfer_credits=transfer_credits,
+        total_with_transfer=total_with_transfer
     )
 
 @main.route("/finance")
@@ -417,21 +426,51 @@ def finance():
             })
             total_credits += course.credits
 
-    total_fee = total_credits * credit_hour_fee
+    # 动态学费
+    tuition_fee = total_credits * credit_hour_fee
 
-    # 奖学金百分比（默认 0%，可视需求改为数据库字段）
+    # ✅ 固定费用结构（模仿 MMU 官方网站）
+    fixed_fees = {
+        "Registration Fee": 250,
+        "Activity Fee": 100,
+        "Lab/Studio Fee": 100  # 如有 Lab 可启用
+    }
+
+    total_fixed_fee = sum(fixed_fees.values())
+    total_fee = tuition_fee + total_fixed_fee
+
+    # 奖学金
     scholarship_percentage = current_user.scholarship_percentage or 0
     scholarship_amount = total_fee * (scholarship_percentage / 100)
     net_total = total_fee - scholarship_amount
 
     return render_template("student/finance.html",
         tuition_fees=tuition_fees,
+        fixed_fees=fixed_fees,
+        tuition_fee=tuition_fee,
         total_credits=total_credits,
+        total_fixed_fee=total_fixed_fee,
         total_fee=total_fee,
         scholarship_percentage=scholarship_percentage,
         scholarship_amount=scholarship_amount,
         net_total=net_total
     )
+
+
+@main.route("/forgot-password", methods=["GET", "POST"])
+def forgot_password():
+    form = ForgotPasswordForm()
+    if form.validate_on_submit():
+        email = form.email.data
+        student = Student.query.filter_by(email=email).first()
+        if student:
+            # ✅ 模拟“发送”邮件
+            flash("A password reset link has been sent to your email. Please check your inbox.", "info")
+        else:
+            flash("Email not found. Please make sure you entered a valid student email.", "danger")
+        return redirect(url_for("main.login"))
+    return render_template("shared/forgot_password.html", form=form)
+
 
 
 #===================== Student End =======================
@@ -836,6 +875,30 @@ def admin_all_students():
     students = Student.query.all()
     return render_template("admin/all_students.html", students=students)
 
+@main.route("/admin/credit-transfer", methods=["GET", "POST"])
+@login_required
+def admin_credit_transfer():
+    if not current_user.is_admin:
+        abort(403)
+
+    form = CreditTransferForm()
+    form.student_id.choices = [(s.id, s.name) for s in Student.query.all()]
+
+    if form.validate_on_submit():
+        ct = CreditTransfer(
+            student_id=form.student_id.data,
+            course_code=form.course_code.data,
+            course_name=form.course_name.data,
+            credits=form.credits.data,
+            reason=form.reason.data
+        )
+        db.session.add(ct)
+        db.session.commit()
+        flash("Credit transfer record added!", "success")
+        return redirect(url_for("main.admin_credit_transfer"))
+
+    transfers = CreditTransfer.query.all()
+    return render_template("admin/credit_transfer.html", form=form, transfers=transfers)
 
 #=================== Admin End =======================
 

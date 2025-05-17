@@ -85,7 +85,9 @@
         {% if current_user.is_admin %}
           <a class="btn btn-nav" href="{{ url_for('main.admin_dashboard') }}">Dashboard</a>
           <a class="btn btn-nav" href="{{ url_for('main.admin_all_students') }}">All Students</a>
+          <a class="btn btn-nav" href="{{ url_for('main.admin_credit_transfer') }}">Manage Credit Transfers</a>
           <a class="btn btn-nav" href="{{ url_for('main.admin_logout') }}">Logout</a>
+
         {% elif current_user.is_student %}
           <a class="btn btn-nav" href="{{ url_for('main.dashboard') }}">Dashboard</a>
           <a class="btn btn-nav" href="{{ url_for('main.profile') }}">My Profile</a>

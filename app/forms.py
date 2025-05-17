@@ -78,4 +78,14 @@ class StudentEditForm(FlaskForm):
 
 from wtforms import SelectField
 
+class ForgotPasswordForm(FlaskForm):
+    email = StringField("Your student email", validators=[DataRequired(), Email()])
+    submit = SubmitField("Send Reset Link")
 
+class CreditTransferForm(FlaskForm):
+    student_id = SelectField("Student", coerce=int, validators=[DataRequired()])
+    course_code = StringField("Course Code", validators=[DataRequired()])
+    course_name = StringField("Course Name", validators=[DataRequired()])
+    credits = IntegerField("Credits", validators=[DataRequired(), NumberRange(min=1)])
+    reason = TextAreaField("Reason (Optional)", validators=[Optional()])
+    submit = SubmitField("Add Credit Transfer")

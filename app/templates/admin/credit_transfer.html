@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block content %}
+<h3>🎓 Add Credit Transfer</h3>
+<form method="POST">
+    {{ form.hidden_tag() }}
+    <div class="mb-3">{{ form.student_id.label }} {{ form.student_id(class="form-select") }}</div>
+    <div class="mb-3">{{ form.course_code.label }} {{ form.course_code(class="form-control") }}</div>
+    <div class="mb-3">{{ form.course_name.label }} {{ form.course_name(class="form-control") }}</div>
+    <div class="mb-3">{{ form.credits.label }} {{ form.credits(class="form-control") }}</div>
+    <div class="mb-3">{{ form.reason.label }} {{ form.reason(class="form-control") }}</div>
+    {{ form.submit(class="btn btn-primary") }}
+</form>
+
+<hr>
+<h4>📋 Existing Credit Transfers</h4>
+<table class="table table-bordered">
+    <thead><tr><th>Student</th><th>Course</th><th>Credits</th><th>Reason</th></tr></thead>
+    <tbody>
+        {% for ct in transfers %}
+        <tr>
+            <td>{{ ct.student.name }}</td>
+            <td>{{ ct.course_code }} - {{ ct.course_name }}</td>
+            <td>{{ ct.credits }}</td>
+            <td>{{ ct.reason or "-" }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

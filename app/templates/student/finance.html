@@ -4,6 +4,7 @@
 <h2>📄 Financial Summary</h2>
 <hr>
 
+<h4>📘 Tuition Fees by Course</h4>
 <table class="table table-bordered">
     <thead>
         <tr>
@@ -23,17 +24,49 @@
         </tr>
         {% endfor %}
         <tr class="table-warning">
-            <td colspan="3" class="text-end"><strong>Total Tuition</strong></td>
+            <td colspan="3" class="text-end"><strong>Tuition Total</strong></td>
+            <td><strong>RM {{ tuition_fee }}</strong></td>
+        </tr>
+    </tbody>
+</table>
+
+<h4 class="mt-4">💼 Fixed Administrative Charges</h4>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Description</th>
+            <th>Amount (RM)</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for label, amount in fixed_fees.items() %}
+        <tr>
+            <td>{{ label }}</td>
+            <td>RM {{ amount }}</td>
+        </tr>
+        {% endfor %}
+        <tr class="table-warning">
+            <td class="text-end"><strong>Fixed Fee Total</strong></td>
+            <td><strong>RM {{ total_fixed_fee }}</strong></td>
+        </tr>
+    </tbody>
+</table>
+
+<h4 class="mt-4">🧾 Final Payment Summary</h4>
+<table class="table table-bordered">
+    <tbody>
+        <tr>
+            <td class="text-end"><strong>Subtotal (Tuition + Fixed)</strong></td>
             <td><strong>RM {{ total_fee }}</strong></td>
         </tr>
         {% if scholarship_percentage > 0 %}
         <tr class="table-success">
-            <td colspan="3" class="text-end">Scholarship ({{ scholarship_percentage }}%)</td>
+            <td class="text-end">Scholarship ({{ scholarship_percentage }}%)</td>
             <td>- RM {{ scholarship_amount }}</td>
         </tr>
         {% endif %}
         <tr class="table-info">
-            <td colspan="3" class="text-end"><strong>Net Payable</strong></td>
+            <td class="text-end"><strong>Net Payable</strong></td>
             <td><strong>RM {{ net_total }}</strong></td>
         </tr>
     </tbody>
