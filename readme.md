@@ -1,7 +1,7 @@
 # 🎓 MMU Student Enrollment System
 
 A web-based course enrollment system built with **Python + Flask + SQLite**, designed to streamline student course registration. Developed for the TSE6223 Software Engineering coursework at MMU.
-
+NICHOLAS.TAY.JUN@student.mmu.edu.my
 ---
 
 ## 🖼️ Website Homepage
