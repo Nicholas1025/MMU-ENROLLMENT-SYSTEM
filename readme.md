@@ -77,8 +77,6 @@ pip install -r requirements.txt
 3. **Run the app**
 python run.py
 
-4. **(Optional) Insert demo data**
-Visit: http://localhost:5000/init-test-data
 
 ---
 
