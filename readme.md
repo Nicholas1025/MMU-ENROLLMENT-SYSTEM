@@ -14,6 +14,7 @@ A web-based course enrollment system built with **Python + Flask + SQLite**, des
 
 ### 👨‍🎓 Student Features
 - Student registration & login (with hashed passwords)
+- Student Forgot Password
 - Department selection during signup
 - View & enroll in available courses (filtered by department)
 - Real-time **quota checking** and **duplicate prevention**
@@ -42,6 +43,7 @@ A web-based course enrollment system built with **Python + Flask + SQLite**, des
 - View course page grouped by section
 - ✅ Set current **active semester** from UI (System Settings)
 - Admin dashboard displays **current semester** + Settings link
+- Add Credit Trasnfer by Student
 
 ---
 

@@ -1003,9 +1003,6 @@ def init_test_data():
     db.session.commit()
     return "✅ Test data initialized with 3 students and 6 courses for Term2410."
 
-
-
-
 #http://localhost:5000/init-test-data
 
 @main.route("/debug-enrollments/<int:student_id>")
