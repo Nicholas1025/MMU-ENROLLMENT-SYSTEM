@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Instructor Dashboard{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">📘 Welcome, {{ instructor.name }}</h2>
+
+    <div class="mb-4">
+        <a href="{{ url_for('instructor.timetable') }}" class="btn btn-outline-primary">
+            🗓 View Timetable
+        </a>
+        <a href="{{ url_for('instructor.profile') }}" class="btn btn-outline-secondary ms-2">
+            👤 Profile & Avatar
+        </a>
+    </div>
+
+    <h4 class="mt-5">📚 Your Sections</h4>
+    {% if sections %}
+    <table class="table table-bordered mt-3">
+        <thead>
+            <tr>
+                <th>Course</th>
+                <th>Section</th>
+                <th>Type</th>
+                <th>Day</th>
+                <th>Time</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for s in sections %}
+            <tr>
+                <td>{{ s.course.course_code }} - {{ s.course.course_name }}</td>
+                <td>{{ s.name }}</td>
+                <td>{{ s.type }}</td>
+                <td>{{ s.day }}</td>
+                <td>{{ s.start_time.strftime('%H:%M') }} - {{ s.end_time.strftime('%H:%M') }}</td>
+                <td>
+                    <a href="{{ url_for('instructor.section_students', section_id=s.id) }}" class="btn btn-sm btn-info">👥 Students</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+        <p class="text-muted">You are not assigned to any section this semester.</p>
+    {% endif %}
+</div>
+{% endblock %}

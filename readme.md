@@ -32,6 +32,7 @@ NICHOLAS.TAY.JUN@student.mmu.edu.my
   - Completed Courses (past semesters)
 - View course details with available Lecture sections
 - Profile page with academic summary
+- View the credit transfer courses added by admin
 
 ### 🧑‍💼 Admin Features
 - Admin login/logout
@@ -43,8 +44,12 @@ NICHOLAS.TAY.JUN@student.mmu.edu.my
 - View course page grouped by section
 - ✅ Set current **active semester** from UI (System Settings)
 - Admin dashboard displays **current semester** + Settings link
+<<<<<<< HEAD
 - Add Credit Trasnfer by Student
 
+=======
+- Add and review the credit transfer courses for student
+>>>>>>> 3503cf129ad14494030a288f45ea16d1f3a29213
 ---
 
 ## 🛠 Tech Stack

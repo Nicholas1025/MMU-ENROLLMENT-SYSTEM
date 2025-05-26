@@ -36,9 +36,9 @@
       <td>{{ section.start_time.strftime('%H:%M') }} - {{ section.end_time.strftime('%H:%M') }}</td>
       <td>{{ section.enrollments|length }}/{{ section.quota }}</td>
       <td>
-        <a href="{{ url_for('main.admin_view_section_students', section_id=section.id) }}" class="btn btn-sm btn-outline-info">View Students</a>
-        <a href="{{ url_for('main.admin_edit_section', section_id=section.id) }}" class="btn btn-sm btn-outline-primary">Edit</a>
-        <a href="{{ url_for('main.admin_delete_section', section_id=section.id) }}" class="btn btn-sm btn-outline-danger">Delete</a>
+        <a href="{{ url_for('admin.admin_view_section_students', section_id=section.id) }}" class="btn btn-sm btn-outline-info">View Students</a>
+        <a href="{{ url_for('admin.admin_edit_section', section_id=section.id) }}" class="btn btn-sm btn-outline-primary">Edit</a>
+        <a href="{{ url_for('admin.admin_delete_section', section_id=section.id) }}" class="btn btn-sm btn-outline-danger">Delete</a>
       </td>
     </tr>
     {% endfor %}

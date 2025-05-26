@@ -10,7 +10,7 @@
 
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h2 class="mb-0">📚 Admin Dashboard</h2>
-    <a href="{{ url_for('main.admin_settings') }}" class="btn btn-outline-secondary btn-sm">⚙️ System Settings</a>
+    <a href="{{ url_for('admin.admin_settings') }}" class="btn btn-outline-secondary btn-sm">⚙️ System Settings</a>
   </div>
   
   <p class="text-muted mb-4">📅 Current Open Semester: <strong>{{ open_semester }}</strong></p>
@@ -52,7 +52,7 @@
 
     <div class="mt-2">
         
-        <a href="{{ url_for('main.admin_add_section') }}" class="btn btn-sm btn-outline-info"> ➕ Add Section </a>
+        <a href="{{ url_for('admin.admin_add_section') }}" class="btn btn-sm btn-outline-info"> ➕ Add Section </a>
         {{ form.submit(class="btn btn-success") }}
     </div>
 </form>
@@ -89,9 +89,9 @@
                 {% endif %}
             </td>
             <td>
-                <a href="{{ url_for('main.admin_edit', course_id=c.id) }}" class="btn btn-sm btn-outline-primary">Edit</a>
-                <a href="{{ url_for('main.admin_delete', course_id=c.id) }}" class="btn btn-sm btn-outline-danger">Delete</a>
-                <a href="{{ url_for('main.admin_course_details', course_id=c.id) }}" class="btn btn-sm btn-outline-secondary">Sections</a>
+                <a href="{{ url_for('admin.admin_edit', course_id=c.id) }}" class="btn btn-sm btn-outline-primary">Edit</a>
+                <a href="{{ url_for('admin.admin_delete', course_id=c.id) }}" class="btn btn-sm btn-outline-danger">Delete</a>
+                <a href="{{ url_for('admin.admin_course_details', course_id=c.id) }}" class="btn btn-sm btn-outline-secondary">Sections</a>
             </td>
         </tr>
         {% endfor %}

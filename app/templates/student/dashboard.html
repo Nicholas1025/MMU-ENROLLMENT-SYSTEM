@@ -11,8 +11,8 @@
       <p>🎓 Completed Credit Hours: <strong>{{ total_credits }}</strong></p>
     </div>
     <div class="col-lg-4 text-end">
-      <a href="{{ url_for('main.my_courses') }}" class="btn btn-outline-primary me-2">📖 My Courses</a>
-      <a href="{{ url_for('main.timetable') }}" class="btn btn-outline-info">📅 My Timetable</a>
+      <a href="{{ url_for('student.my_courses') }}" class="btn btn-outline-primary me-2">📖 My Courses</a>
+      <a href="{{ url_for('student.timetable') }}" class="btn btn-outline-info">📅 My Timetable</a>
     </div>
   </div>
 
@@ -37,9 +37,9 @@
             <td><span class="badge bg-secondary">{{ course.credits }}</span></td>
             <td>
               {% if course.id in enrolled_course_ids %}
-              <a href="{{ url_for('main.drop', course_id=course.id) }}" class="btn btn-sm btn-outline-danger">Drop</a>
+              <a href="{{ url_for('student.drop', course_id=course.id) }}" class="btn btn-sm btn-outline-danger">Drop</a>
               {% else %}
-              <a href="{{ url_for('main.course_detail', course_id=course.id) }}" class="btn btn-sm btn-primary">Select Section</a>
+              <a href="{{ url_for('student.course_detail', course_id=course.id) }}" class="btn btn-sm btn-primary">Select Section</a>
               {% endif %}
             </td>
           </tr>

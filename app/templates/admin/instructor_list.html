@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Instructor List{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <h2>👨‍🏫 Instructor List</h2>
+    <hr>
+    <table class="table table-bordered table-hover">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Profile</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Department</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for instructor in instructors %}
+            <tr>
+                <td>{{ loop.index }}</td>
+                <td>
+                    {% if instructor.profile_pic %}
+                        <img src="{{ url_for('static', filename='uploads/' + instructor.profile_pic) }}" width="50" height="50" class="rounded-circle">
+                    {% else %}
+                        <span class="text-muted">N/A</span>
+                    {% endif %}
+                </td>
+                <td>{{ instructor.name }}</td>
+                <td>{{ instructor.email }}</td>
+                <td>{{ instructor.department }}</td>
+                <td>
+                    <a href="{{ url_for('admin.edit_instructor', instructor_id=instructor.id) }}" class="btn btn-sm btn-outline-primary">Edit</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

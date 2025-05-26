@@ -73,38 +73,53 @@
 <!-- Transparent Navbar -->
 <nav id="navbar" class="navbar navbar-expand-lg navbar-dark navbar-transparent fixed-top px-3" style="background-color: rgba(0,0,0,0.4);">
   <div class="container-fluid">
-    <a class="navbar-brand d-flex align-items-center" href="{{ url_for('main.index') }}">
+    <a class="navbar-brand d-flex align-items-center" href="{{ url_for('shared.index') }}">
       <img src="{{ url_for('static', filename='image/Multimedia_University_secondary_logo_2020.png') }}" alt="MMU Logo">
       <span>Course Enrollment System</span>
     </a>
     <div class="ms-auto d-flex align-items-center">
-      {% if current_user.is_authenticated %}
+            {% if current_user.is_authenticated %}
         <span class="text-white me-3">
-          Welcome, {{ current_user.username if current_user.is_admin else current_user.name }}
+          Welcome, 
+          {% if current_user.is_admin %}
+            {{ current_user.username }}
+          {% elif current_user.is_student %}
+            {{ current_user.name }}
+          {% elif current_user.is_instructor %}
+            {{ current_user.name }}
+          {% endif %}
         </span>
+
         {% if current_user.is_admin %}
-          <a class="btn btn-nav" href="{{ url_for('main.admin_dashboard') }}">Dashboard</a>
-          <a class="btn btn-nav" href="{{ url_for('main.admin_all_students') }}">All Students</a>
-          <a class="btn btn-nav" href="{{ url_for('main.admin_credit_transfer') }}">Manage Credit Transfers</a>
-          <a class="btn btn-nav" href="{{ url_for('main.admin_logout') }}">Logout</a>
+          <a class="btn btn-nav" href="{{ url_for('admin.admin_dashboard') }}">Dashboard</a>
+          <a class="btn btn-nav" href="{{ url_for('admin.admin_all_students') }}">All Students</a>
+          <a class="btn btn-nav" href="{{ url_for('admin.admin_credit_transfer') }}">Manage Credit Transfers</a>
+          <a class="btn btn-nav" href="{{ url_for('admin.admin_logout') }}">Logout</a>
 
         {% elif current_user.is_student %}
-          <a class="btn btn-nav" href="{{ url_for('main.dashboard') }}">Dashboard</a>
-          <a class="btn btn-nav" href="{{ url_for('main.profile') }}">My Profile</a>
-          <a class="btn btn-nav" href="{{ url_for('main.finance') }}">Finance</a>
-          <a class="btn btn-nav" href="{{ url_for('main.logout') }}">Logout</a>
+          <a class="btn btn-nav" href="{{ url_for('student.dashboard') }}">Dashboard</a>
+          <a class="btn btn-nav" href="{{ url_for('student.profile') }}">My Profile</a>
+          <a class="btn btn-nav" href="{{ url_for('student.finance') }}">Finance</a>
+          <a class="btn btn-nav" href="{{ url_for('shared.logout') }}">Logout</a>
+
+        {% elif current_user.is_instructor %}
+          <a class="btn btn-nav" href="{{ url_for('instructor.dashboard') }}">Dashboard</a>
+          <a class="btn btn-nav" href="{{ url_for('instructor.timetable') }}">Timetable</a>
+          <a class="btn btn-nav" href="{{ url_for('instructor.sections') }}">My Sections</a>
+          <a class="btn btn-nav" href="{{ url_for('shared.logout') }}">Logout</a>
         {% endif %}
       {% else %}
-        <a class="btn btn-nav" href="{{ url_for('main.register') }}">Register</a>
-        <a class="btn btn-nav" href="{{ url_for('main.login') }}">Student Login</a>
-        <a class="btn btn-nav" href="{{ url_for('main.admin_login') }}">Admin Login</a>
+        <a class="btn btn-nav" href="{{ url_for('shared.register') }}">Register</a>
+        <a class="btn btn-nav" href="{{ url_for('shared.login') }}">Student Login</a>
+        <a class="btn btn-nav" href="{{ url_for('instructor.instructor_login') }}">Instructor Login</a>
+        <a class="btn btn-nav" href="{{ url_for('shared.admin_login') }}">Admin Login</a>
       {% endif %}
     </div>
   </div>
 </nav>
 
 <!-- Content -->
-<main class="{% if request.endpoint == 'main.index' %}{% else %}container{% endif %}" style="padding-top: 100px;">
+<main class="{% if request.endpoint == 'shared.index' %}{% else %}container{% endif %}" style="padding-top: 100px;">
   {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
       <div class="row justify-content-center">

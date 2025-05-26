@@ -52,21 +52,30 @@ class CourseEditForm(CourseAddForm):
 class SectionForm(FlaskForm):
     course_id = SelectField("Course", coerce=int, validators=[DataRequired()])
     name = StringField("Section Name", validators=[DataRequired()])
-    type = SelectField("Section Type", choices=[("Lecture", "Lecture"), ("Tutorial", "Tutorial"), ("Lab", "Lab")])
-    instructor = StringField("Instructor", validators=[DataRequired()])
+    type = SelectField("Section Type", choices=[
+        ("Lecture", "Lecture"),
+        ("Tutorial", "Tutorial"),
+        ("Lab", "Lab")
+    ], validators=[DataRequired()])
+    
+    instructor = SelectField("Instructor", coerce=int, validators=[DataRequired()])
+    
     location = StringField("Location", validators=[DataRequired()])
+    
     day_of_week = SelectField("Day of Week", choices=[
-        ("Monday", "Monday"), ("Tuesday", "Tuesday"), ("Wednesday", "Wednesday"),
-        ("Thursday", "Thursday"), ("Friday", "Friday")
-    ])
+        ("Monday", "Monday"),
+        ("Tuesday", "Tuesday"),
+        ("Wednesday", "Wednesday"),
+        ("Thursday", "Thursday"),
+        ("Friday", "Friday")
+    ], validators=[DataRequired()])
+    
     start_time = TimeField("Start Time", validators=[DataRequired()])
     end_time = TimeField("End Time", validators=[DataRequired()])
+    
     quota = IntegerField("Quota", validators=[DataRequired()])
+    
     submit = SubmitField("Save Section")
-
-class SemesterSettingForm(FlaskForm):
-    semester = SelectField("Open Semester", choices=[], validators=[DataRequired()])
-    submit = SubmitField("Save Semester")
 
 
 class StudentEditForm(FlaskForm):
@@ -89,3 +98,34 @@ class CreditTransferForm(FlaskForm):
     credits = IntegerField("Credits", validators=[DataRequired(), NumberRange(min=1)])
     reason = TextAreaField("Reason (Optional)", validators=[Optional()])
     submit = SubmitField("Add Credit Transfer")
+
+class InstructorLoginForm(FlaskForm):
+    email = StringField("Email", validators=[DataRequired(), Email()])
+    password = PasswordField("Password", validators=[DataRequired()])
+    submit = SubmitField("Login")
+
+from flask_wtf import FlaskForm
+from wtforms import SubmitField
+from flask_wtf.file import FileField, FileAllowed
+
+class InstructorProfileForm(FlaskForm):
+    profile_pic = FileField("Upload Profile Picture", validators=[
+        FileAllowed(["jpg", "jpeg", "png"], "Only .jpg, .jpeg, .png files allowed!")
+    ])
+    submit = SubmitField("Upload")
+
+class InstructorEditForm(FlaskForm):
+    name = StringField("Name", validators=[DataRequired()])
+    email = StringField("Email", validators=[DataRequired(), Email()])
+    title = StringField("Title")
+    department = StringField("Department")
+    phone = StringField("Phone")
+    office = StringField("Office")
+    biography = TextAreaField("Biography")
+    password = PasswordField("Reset Password (Optional)")
+    profile_pic = FileField("Profile Picture")
+    submit = SubmitField("Save Changes")
+
+class SemesterSettingForm(FlaskForm):
+    semester = SelectField("Open Semester", choices=[], validators=[DataRequired()])
+    submit = SubmitField("Update Semester")

@@ -20,7 +20,7 @@
                 <td>{{ student.department }}</td>
                 <td>{{ student.scholarship_percentage or 0 }}%</td>
                 <td>
-                    <a href="{{ url_for('main.admin_edit_student', student_id=student.id) }}" class="btn btn-sm btn-primary">
+                    <a href="{{ url_for('admin.admin_edit_student', student_id=student.id) }}" class="btn btn-sm btn-primary">
                         Edit
                     </a>
                 </td>

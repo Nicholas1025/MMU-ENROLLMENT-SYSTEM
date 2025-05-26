@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Instructor Profile{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">👨‍🏫 {{ instructor.title or '' }} {{ instructor.name }}</h2>
+
+    <div class="row">
+        <div class="col-md-4">
+            <h5>Profile Picture</h5>
+            {% if instructor.profile_pic %}
+                <img src="{{ url_for('static', filename='uploads/' + instructor.profile_pic) }}" class="img-thumbnail mb-3" style="max-width: 200px;">
+            {% else %}
+                <p class="text-muted">No profile picture uploaded.</p>
+            {% endif %}
+
+            <form method="POST" enctype="multipart/form-data">
+                {{ form.hidden_tag() }}
+                <div class="mb-2">
+                    {{ form.profile_pic.label(class="form-label") }}
+                    {{ form.profile_pic(class="form-control") }}
+                </div>
+                {{ form.submit(class="btn btn-primary btn-sm") }}
+            </form>
+        </div>
+
+        <div class="col-md-8">
+            <p><strong>Name:</strong> {{ instructor.name }}</p>
+            <p><strong>Title:</strong> {{ instructor.title or 'N/A' }}</p>
+            <p><strong>Email:</strong> {{ instructor.email }}</p>
+            <p><strong>Phone:</strong> {{ instructor.phone or 'N/A' }}</p>
+            <p><strong>Office:</strong> {{ instructor.office or 'N/A' }}</p>
+            <p><strong>Department:</strong> {{ instructor.department or 'N/A' }}</p>
+
+            {% if instructor.biography %}
+                <hr>
+                <h5>📘 Biography</h5>
+                <p style="white-space: pre-line;">{{ instructor.biography }}</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <a href="{{ url_for('instructor.dashboard') }}" class="btn btn-outline-secondary mt-4">← Back to Dashboard</a>
+</div>
+{% endblock %}
+    

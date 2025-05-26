@@ -21,7 +21,7 @@
             {{ form.scholarship_percentage(class="form-select") }}
         </div>
         <button type="submit" class="btn btn-success">{{ form.submit.label.text }}</button>
-        <a href="{{ url_for('main.admin_all_students') }}" class="btn btn-secondary ms-2">Cancel</a>
+        <a href="{{ url_for('admin.admin_all_students') }}" class="btn btn-secondary ms-2">Cancel</a>
     </form>
 </div>
 {% endblock %}

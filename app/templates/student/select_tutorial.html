@@ -10,7 +10,7 @@
 <hr>
 
 <h4>Available Tutorial / Lab Sections</h4>
-<form method="POST" action="{{ url_for('main.finalize_enrollment', course_id=course.id) }}">
+<form method="POST" action="{{ url_for('admin.finalize_enrollment', course_id=course.id) }}">
     <input type="hidden" name="lecture_id" value="{{ lecture_id }}">
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
 
@@ -51,7 +51,7 @@
     </table>
 
     <button type="submit" class="btn btn-success">Finalize Enrollment</button>
-    <a href="{{ url_for('main.dashboard') }}" class="btn btn-outline-secondary ms-2">Cancel</a>
+    <a href="{{ url_for('student.dashboard') }}" class="btn btn-outline-secondary ms-2">Cancel</a>
 </form>
 
 {% endblock %}

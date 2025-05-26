@@ -85,12 +85,13 @@ class Section(db.Model):
     course_id = db.Column(db.Integer, db.ForeignKey('course.id'), nullable=False)
     name = db.Column(db.String(20), nullable=False)
     type = db.Column(db.String(20), nullable=False)
-    instructor = db.Column(db.String(64), nullable=False)  # ✅ 加这个
     location = db.Column(db.String(128), nullable=False)    # ✅ 加这个
     day = db.Column(db.String(20), nullable=False)
     start_time = db.Column(db.Time, nullable=False)         # ✅ 建议用标准时间类型
     end_time = db.Column(db.Time, nullable=False)
     quota = db.Column(db.Integer, nullable=False)
+    instructor_id = db.Column(db.Integer, db.ForeignKey("instructor.id"))
+    instructor = db.relationship('Instructor', backref='sections')
 
     course = db.relationship("Course", back_populates="sections")
     enrollments = db.relationship("Enrollment", back_populates="section", cascade="all, delete")
@@ -100,4 +101,35 @@ class SystemSetting(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     key = db.Column(db.String(64), unique=True, nullable=False)
     value = db.Column(db.String(128), nullable=False)
+
+class Instructor(UserMixin, db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(128), nullable=False)
+    email = db.Column(db.String(128), unique=True, nullable=False)
+    password_hash = db.Column(db.String(128))
+
+    title = db.Column(db.String(64))         # 职称，例如 Lecturer
+    department = db.Column(db.String(128))   # 部门，例如 FIST
+    office = db.Column(db.String(128))       # 办公地址
+    phone = db.Column(db.String(32))         # 电话
+    biography = db.Column(db.Text)           # 个人简介
+    profile_pic = db.Column(db.String(128))  # 头像路径
+
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+    
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
+
+    @property
+    def is_instructor(self):
+        return True
+
+    @property
+    def is_admin(self):
+        return False
+
+    @property
+    def is_student(self):
+        return False
 
