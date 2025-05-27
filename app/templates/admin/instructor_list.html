@@ -30,8 +30,9 @@
                 <td>{{ instructor.email }}</td>
                 <td>{{ instructor.department }}</td>
                 <td>
-                    <a href="{{ url_for('admin.edit_instructor', instructor_id=instructor.id) }}" class="btn btn-sm btn-outline-primary">Edit</a>
-                </td>
+    <a href="{{ url_for('admin.admin_edit_instructor', id=instructor.id) }}" class="btn btn-sm btn-outline-primary">Edit</a>
+</td>
+
             </tr>
             {% endfor %}
         </tbody>

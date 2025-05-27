@@ -19,6 +19,9 @@ class Student(UserMixin, db.Model):
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
 
+    def get_id(self):
+        return f"student-{self.id}"
+
     @property
     def is_admin(self):
         return False
@@ -26,6 +29,8 @@ class Student(UserMixin, db.Model):
     @property
     def is_student(self):
         return True
+
+    
 
 
 class Admin(UserMixin, db.Model):
@@ -38,6 +43,9 @@ class Admin(UserMixin, db.Model):
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
+    
+    def get_id(self):
+        return f"admin-{self.id}"
 
     @property
     def is_admin(self):
@@ -117,6 +125,10 @@ class Instructor(UserMixin, db.Model):
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
+
+    def get_id(self):
+        return f"instructor-{self.id}"
+
     
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)

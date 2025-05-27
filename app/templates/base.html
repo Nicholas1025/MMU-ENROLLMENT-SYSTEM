@@ -94,6 +94,7 @@
           <a class="btn btn-nav" href="{{ url_for('admin.admin_dashboard') }}">Dashboard</a>
           <a class="btn btn-nav" href="{{ url_for('admin.admin_all_students') }}">All Students</a>
           <a class="btn btn-nav" href="{{ url_for('admin.admin_credit_transfer') }}">Manage Credit Transfers</a>
+          <a class="btn btn-nav" href="{{ url_for('admin.admin_instructor_list') }}">Manage Instructors</a>
           <a class="btn btn-nav" href="{{ url_for('admin.admin_logout') }}">Logout</a>
 
         {% elif current_user.is_student %}
@@ -111,7 +112,7 @@
       {% else %}
         <a class="btn btn-nav" href="{{ url_for('shared.register') }}">Register</a>
         <a class="btn btn-nav" href="{{ url_for('shared.login') }}">Student Login</a>
-        <a class="btn btn-nav" href="{{ url_for('instructor.instructor_login') }}">Instructor Login</a>
+        <a class="btn btn-nav" href="{{ url_for('instructor.login') }}">Instructor Login</a>
         <a class="btn btn-nav" href="{{ url_for('shared.admin_login') }}">Admin Login</a>
       {% endif %}
     </div>

@@ -1,586 +1,398 @@
 {
   "students": [
     {
-      "name": "Student 1",
-      "email": "student1@student.mmu.edu.my",
-      "password": "123456",
-      "department": "FIST"
+      "id": 1,
+      "name": "Alice Tan Wei Lin",
+      "email": "alice.tan@student.mmu.edu.my",
+      "department": "FIST",
+      "password": "password123",
+      "scholarship_percentage": 25
     },
     {
-      "name": "Student 2",
-      "email": "student2@student.mmu.edu.my",
-      "password": "123456",
-      "department": "FIST"
+      "id": 2,
+      "name": "Marcus Lim Keng Soon",
+      "email": "marcus.lim@student.mmu.edu.my", 
+      "department": "FIST",
+      "password": "password123",
+      "scholarship_percentage": 0
     },
     {
-      "name": "Student 3",
-      "email": "student3@student.mmu.edu.my",
-      "password": "123456",
-      "department": "FIST"
+      "id": 3,
+      "name": "Priya Krishnan",
+      "email": "priya.krishnan@student.mmu.edu.my",
+      "department": "FIST", 
+      "password": "password123",
+      "scholarship_percentage": 50
     },
     {
-      "name": "Student 4",
-      "email": "student4@student.mmu.edu.my",
-      "password": "123456",
-      "department": "FIST"
+      "id": 4,
+      "name": "Ahmad Farhan bin Hassan",
+      "email": "ahmad.farhan@student.mmu.edu.my",
+      "department": "FIST",
+      "password": "password123", 
+      "scholarship_percentage": 15
     },
     {
-      "name": "Student 5",
-      "email": "student5@student.mmu.edu.my",
-      "password": "123456",
-      "department": "FIST"
-    },
-    {
-      "name": "Student 6",
-      "email": "student6@student.mmu.edu.my",
-      "password": "123456",
-      "department": "FIST"
-    },
-    {
-      "name": "Student 7",
-      "email": "student7@student.mmu.edu.my",
-      "password": "123456",
-      "department": "FIST"
-    },
-    {
-      "name": "Student 8",
-      "email": "student8@student.mmu.edu.my",
-      "password": "123456",
-      "department": "FIST"
-    },
-    {
-      "name": "Student 9",
-      "email": "student9@student.mmu.edu.my",
-      "password": "123456",
-      "department": "FIST"
-    },
-    {
-      "name": "Student 10",
-      "email": "student10@student.mmu.edu.my",
-      "password": "123456",
-      "department": "FIST"
-    },
-    {
-      "name": "Student 11",
-      "email": "student11@student.mmu.edu.my",
-      "password": "123456",
-      "department": "FIST"
-    },
-    {
-      "name": "Student 12",
-      "email": "student12@student.mmu.edu.my",
-      "password": "123456",
-      "department": "FIST"
-    },
-    {
-      "name": "Student 13",
-      "email": "student13@student.mmu.edu.my",
-      "password": "123456",
-      "department": "FIST"
-    },
-    {
-      "name": "Student 14",
-      "email": "student14@student.mmu.edu.my",
-      "password": "123456",
-      "department": "FIST"
-    },
-    {
-      "name": "Student 15",
-      "email": "student15@student.mmu.edu.my",
-      "password": "123456",
-      "department": "FIST"
-    },
-    {
-      "name": "Student 16",
-      "email": "student16@student.mmu.edu.my",
-      "password": "123456",
-      "department": "FIST"
-    },
-    {
-      "name": "Student 17",
-      "email": "student17@student.mmu.edu.my",
-      "password": "123456",
-      "department": "FIST"
-    },
-    {
-      "name": "Student 18",
-      "email": "student18@student.mmu.edu.my",
-      "password": "123456",
-      "department": "FIST"
-    },
-    {
-      "name": "Student 19",
-      "email": "student19@student.mmu.edu.my",
-      "password": "123456",
-      "department": "FIST"
-    },
-    {
-      "name": "Student 20",
-      "email": "student20@student.mmu.edu.my",
-      "password": "123456",
-      "department": "FIST"
+      "id": 5,
+      "name": "Sarah Chen Li Mei",
+      "email": "sarah.chen@student.mmu.edu.my",
+      "department": "FIST",
+      "password": "password123",
+      "scholarship_percentage": 0
     }
   ],
+  
+  "instructors": [
+    {
+      "id": 1,
+      "name": "Dr. John Tan Boon Hock",
+      "email": "john.tan@mmu.edu.my",
+      "password": "instructor123",
+      "title": "Associate Professor",
+      "department": "FIST",
+      "office": "FIS-3-07",
+      "phone": "+603-8312-5688",
+      "biography": "Dr. John Tan specializes in software engineering and artificial intelligence. He has over 15 years of teaching experience and has published numerous papers in top-tier conferences.",
+      "profile_pic": null
+    },
+    {
+      "id": 2,
+      "name": "Prof. Maria Santos",
+      "email": "maria.santos@mmu.edu.my", 
+      "password": "instructor123",
+      "title": "Professor",
+      "department": "FIST",
+      "office": "FIS-2-15",
+      "phone": "+603-8312-5689",
+      "biography": "Prof. Maria Santos is an expert in database systems and data analytics. She leads several research projects funded by government grants.",
+      "profile_pic": null
+    },
+    {
+      "id": 3,
+      "name": "Dr. Raj Kumar Patel",
+      "email": "raj.patel@mmu.edu.my",
+      "password": "instructor123", 
+      "title": "Senior Lecturer",
+      "department": "FIST",
+      "office": "FIS-1-22",
+      "phone": "+603-8312-5690",
+      "biography": "Dr. Raj specializes in cybersecurity and network systems. He has industry experience working with major tech companies before joining academia.",
+      "profile_pic": null
+    },
+    {
+      "id": 4,
+      "name": "Dr. Lisa Wong Mei Ling",
+      "email": "lisa.wong@mmu.edu.my",
+      "password": "instructor123",
+      "title": "Lecturer", 
+      "department": "FIST",
+      "office": "FIS-3-18",
+      "phone": "+603-8312-5691",
+      "biography": "Dr. Lisa Wong focuses on web development and mobile applications. She actively collaborates with industry partners on practical projects.",
+      "profile_pic": null
+    }
+  ],
+
   "courses": [
     {
-      "course_code": "FIST0001",
+      "id": 1,
+      "course_code": "FIST1001",
       "course_name": "Introduction to Programming",
-      "quota": 40,
+      "description": "Fundamental concepts of programming using Python. Covers variables, control structures, functions, and basic data structures.",
       "credits": 3,
-      "semester": "Term2410",
-      "location": "A101",
-      "description": "Basic programming logic",
+      "semester": "Term2409",
       "department": "FIST",
-      "day_of_week": "Monday",
+      "prerequisite_id": null
+    },
+    {
+      "id": 2,
+      "course_code": "FIST1002", 
+      "course_name": "Object-Oriented Programming",
+      "description": "Advanced programming concepts using Java. Covers classes, objects, inheritance, polymorphism, and exception handling.",
+      "credits": 4,
+      "semester": "Term2410",
+      "department": "FIST",
+      "prerequisite_id": 1
+    },
+    {
+      "id": 3,
+      "course_code": "FIST2001",
+      "course_name": "Database Systems",
+      "description": "Design and implementation of database systems. Covers SQL, normalization, indexing, and database administration.",
+      "credits": 3,
+      "semester": "Term2410", 
+      "department": "FIST",
+      "prerequisite_id": 1
+    },
+    {
+      "id": 4,
+      "course_code": "FIST2002",
+      "course_name": "Web Development",
+      "description": "Full-stack web development using modern frameworks. Covers HTML, CSS, JavaScript, and server-side programming.",
+      "credits": 4,
+      "semester": "Term2410",
+      "department": "FIST",
+      "prerequisite_id": 2
+    },
+    {
+      "id": 5,
+      "course_code": "FIST3001",
+      "course_name": "Software Engineering",
+      "description": "Software development lifecycle, project management, testing, and quality assurance methodologies.",
+      "credits": 3,
+      "semester": "Term2411",
+      "department": "FIST", 
+      "prerequisite_id": 2
+    },
+    {
+      "id": 6,
+      "course_code": "FIST4001",
+      "course_name": "FYP - Final Year Project",
+      "description": "Capstone project demonstrating mastery of software development skills and knowledge gained throughout the program.",
+      "credits": 6,
+      "semester": "Term2412",
+      "department": "FIST",
+      "prerequisite_id": 5
+    }
+  ],
+
+  "sections": [
+    {
+      "id": 1,
+      "course_id": 2,
+      "name": "FIST1002-LEC-1",
+      "type": "Lecture",
+      "location": "LT-5-01",
+      "day": "Monday", 
       "start_time": "09:00:00",
-      "end_time": "11:00:00"
+      "end_time": "11:00:00",
+      "quota": 40,
+      "instructor_id": 1
     },
     {
-      "course_code": "FIST0002",
-      "course_name": "Data Structures",
+      "id": 2,
+      "course_id": 2,
+      "name": "FIST1002-LEC-2", 
+      "type": "Lecture",
+      "location": "LT-5-02",
+      "day": "Tuesday",
+      "start_time": "14:00:00", 
+      "end_time": "16:00:00",
       "quota": 40,
-      "credits": 3,
-      "semester": "Term2410",
-      "location": "A102",
-      "description": "Arrays, Linked Lists, Trees",
-      "department": "FIST",
-      "day_of_week": "Tuesday",
+      "instructor_id": 1
+    },
+    {
+      "id": 3,
+      "course_id": 2,
+      "name": "FIST1002-TUT-1",
+      "type": "Tutorial",
+      "location": "CR-3-05",
+      "day": "Wednesday",
       "start_time": "10:00:00",
-      "end_time": "12:00:00"
+      "end_time": "12:00:00", 
+      "quota": 25,
+      "instructor_id": 1
     },
     {
-      "course_code": "TML6213",
-      "course_name": "Machine Learning",
-      "quota": 40,
-      "credits": 3,
-      "semester": "Term2410",
-      "location": "B201",
-      "description": "Supervised and unsupervised learning",
-      "department": "FIST",
-      "day_of_week": "Wednesday",
+      "id": 4,
+      "course_id": 2,
+      "name": "FIST1002-TUT-2",
+      "type": "Tutorial",
+      "location": "CR-3-06", 
+      "day": "Thursday",
+      "start_time": "13:00:00",
+      "end_time": "15:00:00",
+      "quota": 25,
+      "instructor_id": 1
+    },
+    {
+      "id": 5,
+      "course_id": 3,
+      "name": "FIST2001-LEC-1",
+      "type": "Lecture",
+      "location": "LT-4-01",
+      "day": "Monday",
       "start_time": "14:00:00",
       "end_time": "16:00:00",
-      "prerequisite_code": "FIST0002"
+      "quota": 35,
+      "instructor_id": 2
     },
     {
-      "course_code": "FYP0001",
-      "course_name": "Final Year Project",
-      "quota": 40,
-      "credits": 6,
-      "semester": "Term2410",
-      "location": "LabX",
-      "description": "Capstone project",
-      "department": "FIST",
-      "day_of_week": "Thursday",
-      "start_time": "13:00:00",
-      "end_time": "17:00:00"
+      "id": 6,
+      "course_id": 3,
+      "name": "FIST2001-LAB-1",
+      "type": "Lab", 
+      "location": "CL-2-08",
+      "day": "Wednesday",
+      "start_time": "14:00:00",
+      "end_time": "17:00:00",
+      "quota": 30,
+      "instructor_id": 2
     },
     {
-      "course_code": "FIST0003",
-      "course_name": "Computer Networks",
-      "quota": 40,
-      "credits": 3,
-      "semester": "Term2410",
-      "location": "C103",
-      "description": "Networking fundamentals",
-      "department": "FIST",
-      "day_of_week": "Friday",
+      "id": 7,
+      "course_id": 4,
+      "name": "FIST2002-LEC-1",
+      "type": "Lecture",
+      "location": "LT-3-02",
+      "day": "Tuesday", 
       "start_time": "09:00:00",
-      "end_time": "11:00:00"
+      "end_time": "12:00:00",
+      "quota": 30,
+      "instructor_id": 4
+    },
+    {
+      "id": 8,
+      "course_id": 4,
+      "name": "FIST2002-LAB-1",
+      "type": "Lab",
+      "location": "CL-1-15",
+      "day": "Friday",
+      "start_time": "09:00:00",
+      "end_time": "12:00:00",
+      "quota": 25,
+      "instructor_id": 4
     }
   ],
+
   "enrollments": [
     {
+      "id": 1,
       "student_id": 1,
-      "course_id": 1
+      "course_id": 2,
+      "section_id": 1
     },
     {
-      "student_id": 2,
-      "course_id": 2
-    },
-    {
-      "student_id": 3,
-      "course_id": 3
-    },
-    {
-      "student_id": 4,
-      "course_id": 4
-    },
-    {
-      "student_id": 5,
-      "course_id": 5
-    },
-    {
-      "student_id": 6,
-      "course_id": 1
-    },
-    {
-      "student_id": 7,
-      "course_id": 2
-    },
-    {
-      "student_id": 8,
-      "course_id": 3
-    },
-    {
-      "student_id": 9,
-      "course_id": 4
-    },
-    {
-      "student_id": 10,
-      "course_id": 5
-    },
-    {
-      "student_id": 11,
-      "course_id": 1
-    },
-    {
-      "student_id": 12,
-      "course_id": 2
-    },
-    {
-      "student_id": 13,
-      "course_id": 3
-    },
-    {
-      "student_id": 14,
-      "course_id": 4
-    },
-    {
-      "student_id": 15,
-      "course_id": 5
-    },
-    {
-      "student_id": 16,
-      "course_id": 1
-    },
-    {
-      "student_id": 17,
-      "course_id": 2
-    },
-    {
-      "student_id": 18,
-      "course_id": 3
-    },
-    {
-      "student_id": 19,
-      "course_id": 4
-    },
-    {
-      "student_id": 20,
-      "course_id": 5
-    },
-    {
+      "id": 2, 
       "student_id": 1,
-      "course_id": 1
+      "course_id": 2,
+      "section_id": 3
     },
     {
-      "student_id": 2,
-      "course_id": 2
-    },
-    {
-      "student_id": 3,
-      "course_id": 3
-    },
-    {
-      "student_id": 4,
-      "course_id": 4
-    },
-    {
-      "student_id": 5,
-      "course_id": 5
-    },
-    {
-      "student_id": 6,
-      "course_id": 1
-    },
-    {
-      "student_id": 7,
-      "course_id": 2
-    },
-    {
-      "student_id": 8,
-      "course_id": 3
-    },
-    {
-      "student_id": 9,
-      "course_id": 4
-    },
-    {
-      "student_id": 10,
-      "course_id": 5
-    },
-    {
-      "student_id": 11,
-      "course_id": 1
-    },
-    {
-      "student_id": 12,
-      "course_id": 2
-    },
-    {
-      "student_id": 13,
-      "course_id": 3
-    },
-    {
-      "student_id": 14,
-      "course_id": 4
-    },
-    {
-      "student_id": 15,
-      "course_id": 5
-    },
-    {
-      "student_id": 16,
-      "course_id": 1
-    },
-    {
-      "student_id": 17,
-      "course_id": 2
-    },
-    {
-      "student_id": 18,
-      "course_id": 3
-    },
-    {
-      "student_id": 19,
-      "course_id": 4
-    },
-    {
-      "student_id": 20,
-      "course_id": 5
-    },
-    {
+      "id": 3,
       "student_id": 1,
-      "course_id": 1
+      "course_id": 3,
+      "section_id": 5
     },
     {
-      "student_id": 2,
-      "course_id": 2
-    },
-    {
-      "student_id": 3,
-      "course_id": 3
-    },
-    {
-      "student_id": 4,
-      "course_id": 4
-    },
-    {
-      "student_id": 5,
-      "course_id": 5
-    },
-    {
-      "student_id": 6,
-      "course_id": 1
-    },
-    {
-      "student_id": 7,
-      "course_id": 2
-    },
-    {
-      "student_id": 8,
-      "course_id": 3
-    },
-    {
-      "student_id": 9,
-      "course_id": 4
-    },
-    {
-      "student_id": 10,
-      "course_id": 5
-    },
-    {
-      "student_id": 11,
-      "course_id": 1
-    },
-    {
-      "student_id": 12,
-      "course_id": 2
-    },
-    {
-      "student_id": 13,
-      "course_id": 3
-    },
-    {
-      "student_id": 14,
-      "course_id": 4
-    },
-    {
-      "student_id": 15,
-      "course_id": 5
-    },
-    {
-      "student_id": 16,
-      "course_id": 1
-    },
-    {
-      "student_id": 17,
-      "course_id": 2
-    },
-    {
-      "student_id": 18,
-      "course_id": 3
-    },
-    {
-      "student_id": 19,
-      "course_id": 4
-    },
-    {
-      "student_id": 20,
-      "course_id": 5
-    },
-    {
+      "id": 4,
       "student_id": 1,
-      "course_id": 1
+      "course_id": 3,
+      "section_id": 6
     },
     {
+      "id": 5,
       "student_id": 2,
-      "course_id": 2
+      "course_id": 2,
+      "section_id": 2
     },
     {
+      "id": 6,
+      "student_id": 2,  
+      "course_id": 2,
+      "section_id": 4
+    },
+    {
+      "id": 7,
+      "student_id": 2,
+      "course_id": 4,
+      "section_id": 7
+    },
+    {
+      "id": 8,
+      "student_id": 2,
+      "course_id": 4,
+      "section_id": 8
+    },
+    {
+      "id": 9,
       "student_id": 3,
-      "course_id": 3
+      "course_id": 3,
+      "section_id": 5
     },
     {
+      "id": 10,
+      "student_id": 3,
+      "course_id": 3,
+      "section_id": 6
+    },
+    {
+      "id": 11,
       "student_id": 4,
-      "course_id": 4
+      "course_id": 2,
+      "section_id": 1
     },
     {
-      "student_id": 5,
-      "course_id": 5
-    },
-    {
-      "student_id": 6,
-      "course_id": 1
-    },
-    {
-      "student_id": 7,
-      "course_id": 2
-    },
-    {
-      "student_id": 8,
-      "course_id": 3
-    },
-    {
-      "student_id": 9,
-      "course_id": 4
-    },
-    {
-      "student_id": 10,
-      "course_id": 5
-    },
-    {
-      "student_id": 11,
-      "course_id": 1
-    },
-    {
-      "student_id": 12,
-      "course_id": 2
-    },
-    {
-      "student_id": 13,
-      "course_id": 3
-    },
-    {
-      "student_id": 14,
-      "course_id": 4
-    },
-    {
-      "student_id": 15,
-      "course_id": 5
-    },
-    {
-      "student_id": 16,
-      "course_id": 1
-    },
-    {
-      "student_id": 17,
-      "course_id": 2
-    },
-    {
-      "student_id": 18,
-      "course_id": 3
-    },
-    {
-      "student_id": 19,
-      "course_id": 4
-    },
-    {
-      "student_id": 20,
-      "course_id": 5
+      "id": 12,
+      "student_id": 4,
+      "course_id": 2, 
+      "section_id": 3
     }
   ],
+
+  "admins": [
+    {
+      "id": 1,
+      "username": "admin",
+      "password": "admin123"
+    },
+    {
+      "id": 2,
+      "username": "registrar",
+      "password": "registrar123" 
+    }
+  ],
+
+  "system_settings": [
+    {
+      "id": 1,
+      "key": "open_semester",
+      "value": "Term2410"
+    },
+    {
+      "id": 2,
+      "key": "max_credits_per_semester", 
+      "value": "20"
+    },
+    {
+      "id": 3,
+      "key": "fyp_credit_requirement",
+      "value": "60"
+    }
+  ],
+
   "credit_transfers": [
     {
+      "id": 1,
       "student_id": 1,
-      "course_code": "EXT1",
-      "course_name": "External Course 1",
+      "course_code": "COMP1001",
+      "course_name": "Computer Fundamentals", 
       "credits": 3,
-      "reason": "Exchange Program"
+      "reason": "Transferred from previous institution - Tunku Abdul Rahman University"
     },
     {
-      "student_id": 2,
-      "course_code": "EXT2",
-      "course_name": "External Course 2",
-      "credits": 3,
-      "reason": "Exchange Program"
-    },
-    {
+      "id": 2,
       "student_id": 3,
-      "course_code": "EXT3",
-      "course_name": "External Course 3",
-      "credits": 3,
-      "reason": "Exchange Program"
+      "course_code": "MATH1101",
+      "course_name": "Calculus I",
+      "credits": 4,
+      "reason": "Advanced Placement (AP) credit from high school"
     },
     {
+      "id": 3,
       "student_id": 4,
-      "course_code": "EXT4",
-      "course_name": "External Course 4",
-      "credits": 3,
-      "reason": "Exchange Program"
+      "course_code": "ENG1001", 
+      "course_name": "Academic English",
+      "credits": 2,
+      "reason": "IELTS score 7.5 - exempted from English requirement"
     },
     {
-      "student_id": 5,
-      "course_code": "EXT5",
-      "course_name": "External Course 5",
+      "id": 4,
+      "student_id": 2,
+      "course_code": "STAT2001",
+      "course_name": "Statistics for IT",
       "credits": 3,
-      "reason": "Exchange Program"
-    },
-    {
-      "student_id": 6,
-      "course_code": "EXT6",
-      "course_name": "External Course 6",
-      "credits": 3,
-      "reason": "Exchange Program"
-    },
-    {
-      "student_id": 7,
-      "course_code": "EXT7",
-      "course_name": "External Course 7",
-      "credits": 3,
-      "reason": "Exchange Program"
-    },
-    {
-      "student_id": 8,
-      "course_code": "EXT8",
-      "course_name": "External Course 8",
-      "credits": 3,
-      "reason": "Exchange Program"
-    },
-    {
-      "student_id": 9,
-      "course_code": "EXT9",
-      "course_name": "External Course 9",
-      "credits": 3,
-      "reason": "Exchange Program"
-    },
-    {
-      "student_id": 10,
-      "course_code": "EXT10",
-      "course_name": "External Course 10",
-      "credits": 3,
-      "reason": "Exchange Program"
+      "reason": "Industry certification equivalent - completed professional course"
     }
   ]
 }

@@ -1,0 +1,545 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+
+<style>
+  /* Enhanced animations and effects */
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slideInRight {
+    from {
+      opacity: 0;
+      transform: translateX(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+  }
+
+  @keyframes shimmer {
+    0% { background-position: -200px 0; }
+    100% { background-position: calc(200px + 100%) 0; }
+  }
+
+  /* Page container with gradient background */
+  .dashboard-container {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding: 2rem 0;
+  }
+
+  .container-fluid {
+    animation: fadeInUp 0.8s ease-out;
+  }
+
+  /* Header section */
+  .dashboard-header {
+    background: white;
+    border-radius: 20px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .dashboard-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #667eea, #764ba2, #f093fb, #f5576c);
+    background-size: 300% 100%;
+    animation: shimmer 3s ease-in-out infinite;
+  }
+
+  .dashboard-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 1rem;
+  }
+
+  .dashboard-info {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+    margin-top: 1.5rem;
+  }
+
+  .info-card {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 15px;
+    padding: 1.5rem;
+    border-left: 5px solid;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .info-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+  }
+
+  .info-card.semester { border-color: #667eea; }
+  .info-card.credits { border-color: #f093fb; }
+  .info-card.completed { border-color: #43e97b; }
+
+  .info-card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, rgba(255,255,255,0.8), rgba(255,255,255,0.4));
+    border-radius: 0 15px 0 50px;
+  }
+
+  /* Action buttons */
+  .action-buttons {
+    animation: slideInRight 0.8s ease-out 0.2s both;
+  }
+
+  .btn-enhanced {
+    border-radius: 25px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    text-decoration: none;
+    display: inline-block;
+  }
+
+  .btn-enhanced::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.6s;
+  }
+
+  .btn-enhanced:hover::before {
+    left: 100%;
+  }
+
+  .btn-enhanced:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+  }
+
+  /* Enhanced cards */
+  .enhanced-card {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+    margin-bottom: 2rem;
+    overflow: hidden;
+    animation: fadeInUp 0.8s ease-out;
+  }
+
+  .enhanced-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.12);
+  }
+
+  .enhanced-card:nth-child(2) { animation-delay: 0.1s; }
+  .enhanced-card:nth-child(3) { animation-delay: 0.2s; }
+  .enhanced-card:nth-child(4) { animation-delay: 0.3s; }
+
+  .card-header-enhanced {
+    padding: 1.5rem 2rem;
+    font-weight: 600;
+    font-size: 1.1rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card-header-enhanced::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: rgba(255,255,255,0.3);
+  }
+
+  .header-success {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+  }
+
+  .header-danger {
+    background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);
+    color: white;
+  }
+
+  .header-secondary {
+    background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+    color: white;
+  }
+
+  /* Enhanced table */
+  .table-enhanced {
+    margin: 0;
+  }
+
+  .table-enhanced thead th {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border: none;
+    font-weight: 600;
+    color: #495057;
+    padding: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.85rem;
+  }
+
+  .table-enhanced tbody tr {
+    transition: all 0.3s ease;
+    border: none;
+  }
+
+  .table-enhanced tbody tr:hover {
+    background: linear-gradient(135deg, #f8f9ff 0%, #e3f2fd 100%);
+    transform: scale(1.01);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+  }
+
+  .table-enhanced td {
+    padding: 1.25rem 1rem;
+    border-top: 1px solid #f1f3f4;
+    vertical-align: middle;
+  }
+
+  /* Enhanced badges */
+  .badge-enhanced {
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    border-radius: 20px;
+    background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+    color: white;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  }
+
+  /* Enhanced buttons */
+  .btn-enhanced-sm {
+    border-radius: 20px;
+    padding: 0.5rem 1.25rem;
+    font-weight: 600;
+    font-size: 0.85rem;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-enhanced-sm:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+  }
+
+  .btn-primary-enhanced {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    border: none;
+    color: white;
+  }
+
+  .btn-danger-enhanced {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    border: none;
+    color: white;
+  }
+
+  /* Enhanced list group */
+  .list-group-enhanced .list-group-item {
+    border: none;
+    border-radius: 10px;
+    margin-bottom: 0.5rem;
+    padding: 1rem 1.5rem;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    transition: all 0.3s ease;
+  }
+
+  .list-group-enhanced .list-group-item:hover {
+    transform: translateX(10px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  }
+
+  /* Count badges with animation */
+  .count-badge {
+    background: rgba(255,255,255,0.2);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    animation: pulse 2s infinite;
+  }
+
+  /* Mobile responsiveness */
+  @media (max-width: 768px) {
+    .dashboard-container {
+      padding: 1rem 0;
+    }
+    
+    .dashboard-header {
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .dashboard-title {
+      font-size: 2rem;
+    }
+    
+    .info-card {
+      padding: 1rem;
+    }
+    
+    .enhanced-card {
+      margin-bottom: 1.5rem;
+    }
+  }
+
+  /* Loading shimmer effect */
+  .shimmer {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
+</style>
+
+<div class="dashboard-container">
+  <div class="container-fluid px-4">
+    <!-- Enhanced Header -->
+    <div class="dashboard-header">
+      <div class="row align-items-center">
+        <div class="col-lg-8">
+          <h2 class="dashboard-title">🎓 Student Dashboard</h2>
+          <div class="dashboard-info">
+            <div class="info-card semester">
+              <div class="fw-bold text-primary mb-1">📅 Current Semester</div>
+              <div class="h5 mb-0">{{ open_semester }}</div>
+            </div>
+            <div class="info-card credits">
+              <div class="fw-bold text-warning mb-1">🎯 Semester Load</div>
+              <div class="h5 mb-0">{{ current_semester_credits }}/{{ max_credits }} credits</div>
+            </div>
+            <div class="info-card completed">
+              <div class="fw-bold text-success mb-1">🎓 Completed Hours</div>
+              <div class="h5 mb-0">{{ total_credits }} credits</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-4 text-end action-buttons">
+          <a href="{{ url_for('student.my_courses') }}" class="btn btn-outline-primary btn-enhanced me-2">📖 My Courses</a>
+          <a href="{{ url_for('student.timetable') }}" class="btn btn-outline-info btn-enhanced">📅 My Timetable</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ✅ Eligible Courses -->
+    <div class="enhanced-card">
+      <div class="card-header-enhanced header-success">
+        <i class="fas fa-check-circle me-2"></i>
+        ✅ Eligible Courses 
+        <span class="count-badge">{{ eligible_courses|length }}</span>
+      </div>
+      <div class="card-body p-0">
+        {% if eligible_courses %}
+        <table class="table table-enhanced table-hover mb-0">
+          <thead>
+            <tr>
+              <th>Code</th>
+              <th>Name & Description</th>
+              <th>Credits</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for course in eligible_courses %}
+            <tr>
+              <td class="fw-semibold text-primary">{{ course.course_code }}</td>
+              <td>
+                <div class="fw-bold">{{ course.course_name }}</div>
+                <small class="text-muted">{{ course.description }}</small>
+              </td>
+              <td><span class="badge-enhanced">{{ course.credits }}</span></td>
+              <td>
+                {% if course.id in enrolled_course_ids %}
+                <a href="{{ url_for('student.drop', course_id=course.id) }}" class="btn btn-enhanced-sm btn-danger-enhanced">Drop</a>
+                {% else %}
+                <a href="{{ url_for('student.course_detail', course_id=course.id) }}" class="btn btn-enhanced-sm btn-primary-enhanced">Select Section</a>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% else %}
+        <div class="p-4 text-muted text-center">
+          <i class="fas fa-info-circle fa-2x mb-3 text-secondary"></i>
+          <div>No eligible courses this semester.</div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- ❌ Locked Courses -->
+    <div class="enhanced-card">
+      <div class="card-header-enhanced header-danger">
+        <i class="fas fa-lock me-2"></i>
+        ❌ Locked Courses 
+        <span class="count-badge">{{ locked_courses|length }}</span>
+      </div>
+      <div class="card-body p-0">
+        {% if locked_courses %}
+        <table class="table table-enhanced table-hover mb-0">
+          <thead>
+            <tr>
+              <th>Code</th>
+              <th>Name & Description</th>
+              <th>Credits</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for course in locked_courses %}
+            <tr>
+              <td class="fw-semibold text-danger">{{ course.course_code }}</td>
+              <td>
+                <div class="fw-bold">{{ course.course_name }}</div>
+                <small class="text-muted">{{ course.description }}</small>
+              </td>
+              <td><span class="badge-enhanced">{{ course.credits }}</span></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% else %}
+        <div class="p-4 text-muted text-center">
+          <i class="fas fa-unlock-alt fa-2x mb-3 text-secondary"></i>
+          <div>No locked courses.</div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- ✔ Completed Courses -->
+    <div class="enhanced-card">
+      <div class="card-header-enhanced header-secondary">
+        <i class="fas fa-graduation-cap me-2"></i>
+        ✔ Completed Courses 
+        <span class="count-badge">{{ completed_courses|length }}</span>
+      </div>
+      <div class="card-body">
+        {% if completed_courses %}
+        <ul class="list-group list-group-enhanced">
+          {% for course in completed_courses %}
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <div>
+              <div class="fw-bold">{{ course.course_code }} - {{ course.course_name }}</div>
+            </div>
+            <span class="badge-enhanced">{{ course.credits }} credits</span>
+          </li>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <div class="text-muted text-center py-4">
+          <i class="fas fa-book fa-2x mb-3 text-secondary"></i>
+          <div>No completed courses yet.</div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add ripple effect to buttons
+    const buttons = document.querySelectorAll('.btn-enhanced, .btn-enhanced-sm');
+    
+    buttons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            const ripple = document.createElement('span');
+            const rect = this.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            const x = e.clientX - rect.left - size / 2;
+            const y = e.clientY - rect.top - size / 2;
+            
+            ripple.style.cssText = `
+                position: absolute;
+                border-radius: 50%;
+                background: rgba(255,255,255,0.6);
+                width: ${size}px;
+                height: ${size}px;
+                left: ${x}px;
+                top: ${y}px;
+                transform: scale(0);
+                animation: ripple 0.6s linear;
+                pointer-events: none;
+            `;
+            
+            this.style.position = 'relative';
+            this.style.overflow = 'hidden';
+            this.appendChild(ripple);
+            
+            setTimeout(() => ripple.remove(), 600);
+        });
+    });
+    
+    // Add CSS for ripple animation
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes ripple {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+    `;
+    document.head.appendChild(style);
+    
+    // Add smooth scroll behavior
+    document.documentElement.style.scrollBehavior = 'smooth';
+    
+    // Add loading shimmer effect on page transitions
+    const links = document.querySelectorAll('a[href]');
+    links.forEach(link => {
+        link.addEventListener('click', function() {
+            document.body.style.opacity = '0.7';
+            document.body.style.transition = 'opacity 0.3s ease';
+        });
+    });
+});
+</script>
+
+{% endblock %}

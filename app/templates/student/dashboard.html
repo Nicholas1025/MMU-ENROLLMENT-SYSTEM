@@ -25,26 +25,34 @@
       {% if eligible_courses %}
       <table class="table table-hover mb-0">
         <thead class="table-light">
-          <tr>
-            <th>Code</th><th>Name</th><th>Credits</th><th>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for course in eligible_courses %}
-          <tr>
-            <td class="fw-semibold">{{ course.course_code }}</td>
-            <td>{{ course.course_name }}</td>
-            <td><span class="badge bg-secondary">{{ course.credits }}</span></td>
-            <td>
-              {% if course.id in enrolled_course_ids %}
-              <a href="{{ url_for('student.drop', course_id=course.id) }}" class="btn btn-sm btn-outline-danger">Drop</a>
-              {% else %}
-              <a href="{{ url_for('student.course_detail', course_id=course.id) }}" class="btn btn-sm btn-primary">Select Section</a>
-              {% endif %}
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
+  <tr>
+    <th>Code</th>
+    <th>Name & Description</th>
+    <th>Credits</th>
+    <th>Action</th>
+  </tr>
+      </thead>
+      <tbody>
+        {% for course in eligible_courses %}
+        <tr>
+          <td class="fw-semibold">{{ course.course_code }}</td>
+          <td>
+            <strong>{{ course.course_name }}</strong><br>
+            <small class="text-muted">{{ course.description }}</small>
+          </td>
+          <td><span class="badge bg-secondary">{{ course.credits }}</span></td>
+    
+          <td>
+            {% if course.id in enrolled_course_ids %}
+            <a href="{{ url_for('student.drop', course_id=course.id) }}" class="btn btn-sm btn-outline-danger">Drop</a>
+            {% else %}
+            <a href="{{ url_for('student.course_detail', course_id=course.id) }}" class="btn btn-sm btn-primary">Select Section</a>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+
       </table>
       {% else %}
       <div class="p-3 text-muted">No eligible courses this semester.</div>
@@ -61,19 +69,25 @@
       {% if locked_courses %}
       <table class="table table-hover mb-0">
         <thead class="table-light">
-          <tr>
-            <th>Code</th><th>Name</th><th>Reason</th>
+           <tr>
+            <th>Code</th>
+            <th>Name & Description</th>
+            <th>Credits</th>
           </tr>
         </thead>
         <tbody>
-          {% for course, reason in locked_courses %}
-          <tr>
-            <td class="fw-semibold">{{ course.course_code }}</td>
-            <td>{{ course.course_name }}</td>
-            <td class="text-danger">{{ reason }}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
+        {% for course in eligible_courses %}
+        <tr>
+          <td class="fw-semibold">{{ course.course_code }}</td>
+          <td>
+            <strong>{{ course.course_name }}</strong><br>
+            <small class="text-muted">{{ course.description }}</small>
+          </td>
+          <td><span class="badge bg-secondary">{{ course.credits }}</span></td>
+    
+        </tr>
+        {% endfor %}
+      </tbody>
       </table>
       {% else %}
       <div class="p-3 text-muted">No locked courses.</div>
@@ -104,3 +118,4 @@
 </div>
 
 {% endblock %}
+

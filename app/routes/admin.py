@@ -149,6 +149,26 @@ def import_sample_data():
             db.session.add(student)
     db.session.commit()
 
+        # === Import Instructors ===
+    from ..models import Instructor  # 确保导入了 Instructor 模型
+
+    for i in data.get("instructors", []):
+        if not Instructor.query.filter_by(email=i["email"]).first():
+            instructor = Instructor(
+                name=i["name"],
+                email=i["email"],
+                title=i["title"],
+                department=i["department"],
+                office=i["office"],
+                phone=i["phone"],
+                biography=i["biography"],
+                profile_pic=i.get("profile_pic")
+            )
+            instructor.set_password(i["password"])
+            db.session.add(instructor)
+    db.session.commit()
+
+
     # === First pass: Add Courses without prerequisite
     course_map = {}
     for c in data.get("courses", []):
@@ -175,35 +195,22 @@ def import_sample_data():
                 course.prerequisite_id = prereq.id
     db.session.commit()
 
-    # === Auto-generate Sections (2 Lectures + 2 Tutorials)
-    for course in Course.query.all():
-        for i in range(1, 3):  # Two Lectures
-            section = Section(
-                course_id=course.id,
-                name=f"{course.course_code}-LEC-{i}",
-                type="Lecture",
-                instructor=f"Lecturer {i}",
-                location="Room LEC",
-                day="Monday" if i == 1 else "Tuesday",
-                start_time=datetime.strptime(f"{9+i}:00:00", "%H:%M:%S").time(),
-                end_time=datetime.strptime(f"{11+i}:00:00", "%H:%M:%S").time(),
-                quota=40
-            )
-            db.session.add(section)
-        for i in range(1, 3):  # Two Tutorials
-            section = Section(
-                course_id=course.id,
-                name=f"{course.course_code}-TUT-{i}",
-                type="Tutorial",
-                instructor=f"Tutor {i}",
-                location="Room TUT",
-                day="Wednesday" if i == 1 else "Thursday",
-                start_time=datetime.strptime(f"{13+i}:00:00", "%H:%M:%S").time(),
-                end_time=datetime.strptime(f"{14+i}:00:00", "%H:%M:%S").time(),
-                quota=25
-            )
-            db.session.add(section)
+    # === Import Sections (from JSON) ===
+    for s in data.get("sections", []):
+        section = Section(
+            course_id=s["course_id"],
+            name=s["name"],
+            type=s["type"],
+            location=s["location"],
+            day=s["day"],
+            start_time=datetime.strptime(s["start_time"], "%H:%M:%S").time(),
+            end_time=datetime.strptime(s["end_time"], "%H:%M:%S").time(),
+            quota=s["quota"],
+            instructor_id=s["instructor_id"]  # ✅ 正确使用 instructor 外键
+        )
+        db.session.add(section)
     db.session.commit()
+
 
     # === Import Enrollments (randomly pick one section for each course)
     for e in data.get("enrollments", []):

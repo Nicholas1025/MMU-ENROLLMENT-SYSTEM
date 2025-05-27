@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, request, abort, current_app
+from flask import Blueprint, render_template, redirect, url_for, flash, request, abort, current_app, session
 from flask_login import login_user, logout_user, login_required, current_user
 from ..models import db, Instructor, Section, Enrollment, Student
 from ..forms import InstructorLoginForm, InstructorProfileForm
@@ -7,17 +7,15 @@ import os
 
 instructor_bp = Blueprint("instructor", __name__, url_prefix="/instructor")
 
-@instructor_bp.route("  ", methods=["GET", "POST"])
-def instructor_login():
-    form = InstructorLoginForm()
-    if form.validate_on_submit():
-        instructor = Instructor.query.filter_by(email=form.email.data).first()
-        if instructor and instructor.check_password(form.password.data):
-            login_user(instructor)
-            flash("Instructor login successful!", "success")
-            return redirect(url_for("instructor.dashboard"))
-        flash("Invalid credentials.", "danger")
-    return render_template("instructor/login.html", form=form)
+@instructor_bp.route("/dashboard")
+@login_required
+def dashboard():
+    if not current_user.is_instructor:
+        abort(403)
+
+    instructor = current_user
+    sections = Section.query.filter_by(instructor_id=instructor.id).all()
+    return render_template("instructor/dashboard.html", instructor=instructor, sections=sections)
 
 @instructor_bp.route("/login", methods=["GET", "POST"])
 def login():
@@ -25,6 +23,7 @@ def login():
     if form.validate_on_submit():
         instructor = Instructor.query.filter_by(email=form.email.data).first()
         if instructor and instructor.check_password(form.password.data):
+            session["role"] = "instructor"
             login_user(instructor)
             flash("Instructor login successful!", "success")
             return redirect(url_for("instructor.dashboard"))
@@ -71,8 +70,7 @@ def timetable():
     if not current_user.is_instructor:
         abort(403)
 
-    sections = Section.query.filter_by(instructor=current_user.name).all()
-
+    sections = Section.query.filter_by(instructor_id=current_user.id).all()
     return render_template("instructor/timetable.html", sections=sections)
 
 @instructor_bp.route("/sections")
@@ -81,8 +79,8 @@ def sections():
     if not current_user.is_instructor:
         abort(403)
 
-    sections = Section.query.filter_by(instructor=current_user.name).all()
-    return render_template("instructor/sections.html", sections=sections)
+    sections = Section.query.filter_by(instructor_id=current_user.id).all()
+    return render_template("instructor/section.html", sections=sections)
 
 @instructor_bp.route("/section/<int:section_id>/students")
 @login_required
@@ -91,7 +89,7 @@ def section_students(section_id):
         abort(403)
 
     section = Section.query.get_or_404(section_id)
-    if section.instructor != current_user.name:
+    if section.instructor_id != current_user.id:
         abort(403)
 
     students = [e.student for e in section.enrollments]

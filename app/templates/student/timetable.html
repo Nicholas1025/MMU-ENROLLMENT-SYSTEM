@@ -1,64 +1,434 @@
 {% extends "base.html" %}
 {% block title %}My Timetable{% endblock %}
 {% block content %}
-<h2>My Weekly Timetable</h2>
-<h4 class="mb-3">🗓️ My Registered Sections for {{ open_semester }}</h4>
 
 <style>
+    .timetable-container {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    }
+    
+    .timetable-header {
+        text-align: center;
+        color: white;
+        margin-bottom: 2rem;
+    }
+    
+    .timetable-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+    
+    .semester-info {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        font-weight: 300;
+    }
+    
+    .timetable-wrapper {
+        background: white;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    
     table.timetable {
         table-layout: fixed;
         width: 100%;
-        text-align: center;
         border-collapse: collapse;
+        font-size: 0.875rem;
+        margin: 0;
     }
-    table.timetable th, table.timetable td {
-        border: 1px solid #ccc;
-        padding: 8px;
+    
+    table.timetable th {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        color: white;
+        padding: 1rem 0.5rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border: none;
+        position: relative;
+    }
+    
+    table.timetable th:first-child {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    
+    table.timetable td {
+        border: 1px solid #e9ecef;
+        padding: 0.5rem;
         vertical-align: top;
-        height: 80px;
+        height: 100px;
+        background: #fafbfc;
+        transition: all 0.3s ease;
     }
+    
+    table.timetable td:first-child {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        font-weight: 600;
+        color: #495057;
+        text-align: center;
+        vertical-align: middle;
+    }
+    
+    table.timetable td:hover {
+        background: #f0f9ff;
+        transform: scale(1.02);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
     .course-block {
-        background-color: #e3f2fd;
-        border-radius: 5px;
-        padding: 4px;
-        font-size: 0.85rem;
+        border-radius: 10px;
+        padding: 0.75rem;
+        font-size: 0.8rem;
+        text-align: left;
+        margin-bottom: 0.5rem;
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        cursor: pointer;
     }
+    
+    .course-block:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+    
+    .course-block::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: inherit;
+        opacity: 0.8;
+    }
+    
+    .course-lecture {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-left: 4px solid #4c63d2;
+    }
+    
+    .course-lab {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+        border-left: 4px solid #e91e63;
+    }
+    
+    .course-tutorial {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        color: white;
+        border-left: 4px solid #0088cc;
+    }
+    
+    .course-other {
+        background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        color: white;
+        border-left: 4px solid #00d4aa;
+    }
+    
+    .course-code {
+        font-weight: 700;
+        font-size: 0.85rem;
+        margin-bottom: 0.25rem;
+        text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    }
+    
+    .course-meta {
+        font-size: 0.7rem;
+        opacity: 0.9;
+        margin: 0.125rem 0;
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+    
+    .course-meta i {
+        width: 12px;
+        text-align: center;
+    }
+    
+    .time-slot {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #495057;
+    }
+    
+    .back-button {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        color: white;
+        padding: 0.75rem 2rem;
+        border-radius: 50px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+    
+    .back-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+        color: white;
+        text-decoration: none;
+    }
+    
+    .stats-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        text-align: center;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+    }
+    
+    .stat-number {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #667eea;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stat-label {
+        color: #6c757d;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-size: 0.8rem;
+    }
+    
+    @media (max-width: 768px) {
+        .timetable-container {
+            padding: 1rem;
+        }
+        
+        .timetable-title {
+            font-size: 2rem;
+        }
+        
+        table.timetable {
+            font-size: 0.75rem;
+        }
+        
+        table.timetable td {
+            height: 80px;
+            padding: 0.25rem;
+        }
+        
+        .course-block {
+            padding: 0.5rem;
+            font-size: 0.7rem;
+        }
+    }
+    
+    /* Animation for page load */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .timetable-container {
+        animation: fadeInUp 0.8s ease-out;
+    }
+    
+    .course-block {
+        animation: fadeInUp 0.6s ease-out;
+        animation-fill-mode: both;
+    }
+    
+    .course-block:nth-child(1) { animation-delay: 0.1s; }
+    .course-block:nth-child(2) { animation-delay: 0.2s; }
+    .course-block:nth-child(3) { animation-delay: 0.3s; }
 </style>
 
-<table class="timetable">
-    <thead>
-        <tr>
-            <th>Time</th>
-            {% for day in ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'] %}
-                <th>{{ day }}</th>
-            {% endfor %}
-        </tr>
-    </thead>
-    <tbody>
-        {% for hour in range(8, 18) %}
-        <tr>
-            <td>{{ "%02d:00 - %02d:00" % (hour, hour + 1) }}</td>
-            {% for day in ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'] %}
-            <td>
-                {% for s in sections %}
-                    {% if s.day == day and s.start_time.hour <= hour < s.end_time.hour %}
-                        <div class="course-block">
-                            <strong>{{ s.course.course_code }}</strong><br>
-                            {{ s.name }} ({{ s.type }})<br>
-                            {{ s.location }}<br>
-                            {{ s.start_time.strftime('%H:%M') }} - {{ s.end_time.strftime('%H:%M') }}<br>
-                            {{ s.instructor }}
-                        </div>
+<div class="timetable-container">
+    <div class="timetable-header">
+        <h1 class="timetable-title">📅 My Weekly Timetable</h1>
+        <p class="semester-info">Registered Sections for <strong>{{ open_semester }}</strong></p>
+    </div>
+    
+    <!-- Statistics Cards -->
+    <div class="stats-container">
+        <div class="stat-card">
+            <div class="stat-number">{{ sections|length }}</div>
+            <div class="stat-label">Total Sections</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ sections|selectattr('type', 'equalto', 'Lecture')|list|length }}</div>
+            <div class="stat-label">Lectures</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ sections|map(attribute='course.course_code')|unique|list|length }}</div>
+            <div class="stat-label">Courses</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ ((sections|sum(attribute='end_time.hour') - sections|sum(attribute='start_time.hour')) / sections|length * 5)|round|int }}</div>
+            <div class="stat-label">Hours/Week</div>
+        </div>
+    </div>
+    
+    <div class="timetable-wrapper">
+        <table class="timetable">
+            <thead>
+                <tr>
+                    <th style="width: 120px;">⏰ Time</th>
+                    {% for day in ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'] %}
+                        <th>{{ day }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            
+            {% set cell_map = {} %}
+            {% for s in sections %}
+                {% for h in range(s.start_time.hour, s.end_time.hour) %}
+                    {% set cell_key = (s.day, h) %}
+                    {% if cell_map.get(cell_key) %}
+                        {% set _ = cell_map[cell_key].append(s) %}
+                    {% else %}
+                        {% set _ = cell_map.update({cell_key: [s]}) %}
                     {% endif %}
                 {% endfor %}
-            </td>
             {% endfor %}
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+            
+            <tbody>
+                {% for hour in range(8, 18) %}
+                <tr>
+                    <td>
+                        <div class="time-slot">{{ "%02d:00" % hour }}</div>
+                        <div style="font-size: 0.7rem; color: #6c757d;">{{ "%02d:00" % (hour + 1) }}</div>
+                    </td>
+                    {% for day in ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'] %}
+                    <td>
+                        {% set key = (day, hour) %}
+                        {% for s in cell_map.get(key, []) %}
+                        {% if s.type.lower() == "lecture" %}
+                            {% set block_class = "course-lecture" %}
+                        {% elif s.type.lower() == "lab" %}
+                            {% set block_class = "course-lab" %}
+                        {% elif s.type.lower() == "tutorial" %}
+                            {% set block_class = "course-tutorial" %}
+                        {% else %}
+                            {% set block_class = "course-other" %}
+                        {% endif %}
+                        
+                        <div class="course-block {{ block_class }}" title="{{ s.course.course_code }} - {{ s.name }}">
+                            <div class="course-code">{{ s.course.course_code }}</div>
+                            <div class="course-code" style="font-weight: 500; font-size: 0.75rem; margin-bottom: 0.5rem;">{{ s.name }}</div>
+                            
+                            <div class="course-meta">
+                                <i>📍</i>
+                                <span>{{ s.location }}</span>
+                            </div>
+                            
+                            <div class="course-meta">
+                                <i>⏱️</i>
+                                <span>{{ s.start_time.strftime('%H:%M') }} - {{ s.end_time.strftime('%H:%M') }}</span>
+                            </div>
+                            
+                            {% if s.instructor %}
+                            <div class="course-meta">
+                                <i>👨‍🏫</i>
+                                <span>{{ s.instructor.title }} {{ s.instructor.name }}</span>
+                            </div>
+                            {% endif %}
+                            
+                            <div class="course-meta">
+                                <i>📚</i>
+                                <span>{{ s.type }}</span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
 
-<a href="{{ url_for('student.dashboard') }}" class="btn btn-outline-secondary mt-4">Back to Dashboard</a>
+<div class="text-center">
+    <a href="{{ url_for('student.dashboard') }}" class="back-button">
+        <i>←</i>
+        <span>Back to Dashboard</span>
+    </a>
+</div>
 
-  
-{% endblock %}
+<script>
+// Add some interactive effects
+document.addEventListener('DOMContentLoaded', function() {
+    // Add click effect to course blocks
+    const courseBlocks = document.querySelectorAll('.course-block');
+    
+    courseBlocks.forEach(block => {
+        block.addEventListener('click', function() {
+            // Create ripple effect
+            const ripple = document.createElement('div');
+            ripple.style.cssText = `
+                position: absolute;
+                border-radius: 50%;
+                background: rgba(255,255,255,0.6);
+                transform: scale(0);
+                animation: ripple 0.6s linear;
+                pointer-events: none;
+            `;
+            
+            const rect = this.getBoundingClientRect();
+            const size = Math.max(rect.width, rect.height);
+            ripple.style.width = ripple.style.height = size + 'px';
+            ripple.style.left = (event.clientX - rect.left - size / 2) + 'px';
+            ripple.style.top = (event.clientY - rect.top - size / 2) + 'px';
+            
+            this.style.position = 'relative';
+            this.appendChild(ripple);
+            
+            setTimeout(() => {
+                ripple.remove();
+            }, 600);
+        });
+    });
+    
+    // Add CSS for ripple animation
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes ripple {
+            to {
+                transform: scale(4);
+                opacity: 0;
+            }
+        }
+    `;
+    document.head.appendChild(style);
+});
+</script>
+
+{% endblock %} 
