@@ -253,7 +253,8 @@ def admin_add_section():
 
     form = SectionForm()
     form.course_id.choices = [(c.id, f"{c.course_code} - {c.course_name}") for c in Course.query.all()]
-    form.instructor_id.choices = [(i.id, f"{i.title or ''} {i.name}") for i in Instructor.query.all()]
+    form.instructor.choices = [(i.id, f"{i.title or ''} {i.name}") for i in Instructor.query.all()]
+
 
     if form.validate_on_submit():
         section = Section(
@@ -283,14 +284,18 @@ def admin_edit_section(section_id):
 
     section = Section.query.get_or_404(section_id)
     form = SectionForm(obj=section)
+
     form.course_id.choices = [(c.id, f"{c.course_code} - {c.course_name}") for c in Course.query.all()]
-    form.course_id.data = section.course_id   
+    form.instructor.choices = [(i.id, f"{i.title or ''} {i.name}") for i in Instructor.query.all()]
+
+    form.course_id.data = section.course_id
+    form.instructor.data = section.instructor_id  # ✅ 设定默认值
 
     if form.validate_on_submit():
         section.course_id = form.course_id.data
         section.name = form.name.data
         section.type = form.type.data
-        section.instructor = form.instructor.data
+        section.instructor_id = form.instructor.data  # ✅ 正确存 instructor_id
         section.location = form.location.data
         section.day = form.day_of_week.data
         section.start_time = form.start_time.data
@@ -300,8 +305,8 @@ def admin_edit_section(section_id):
         flash("Section updated!", "success")
         return redirect(url_for('admin.admin_dashboard'))
 
-
     return render_template('admin/section_form.html', form=form, title="Edit Section")
+
 
 @admin_bp.route("/admin/student/<int:student_id>/edit", methods=["GET", "POST"])
 @login_required
