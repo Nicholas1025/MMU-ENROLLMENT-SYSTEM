@@ -5,6 +5,7 @@ from ..forms import AdminLoginForm, CourseAddForm, CourseEditForm, SectionForm, 
 import os
 import uuid
 from werkzeug.utils import secure_filename
+from datetime import datetime
 
 admin_bp = Blueprint("admin", __name__, url_prefix="/admin")
 
@@ -555,3 +556,156 @@ def admin_instructor_list():
 
     instructors = Instructor.query.all()
     return render_template("admin/instructor_list.html", instructors=instructors)
+
+# Add this to your admin_bp routes in the admin blueprint file
+
+@admin_bp.route("/admin/reports")
+@login_required
+def admin_reports():
+    if not current_user.is_admin:
+        abort(403)
+
+    # Get current semester
+    setting = SystemSetting.query.filter_by(key="open_semester").first()
+    open_semester = setting.value if setting else "Term2410"
+
+    # 1. Course Enrollment vs Capacity Data
+    course_stats = []
+    courses = Course.query.filter_by(semester=open_semester).all()
+    
+    for course in courses:
+        # Get all sections for this course
+        sections = Section.query.filter_by(course_id=course.id).all()
+        total_capacity = sum(section.quota for section in sections)
+        
+        # Count unique students enrolled (avoid double counting lecture + tutorial)
+        enrolled_students = db.session.query(Enrollment.student_id).join(Section).filter(
+            Section.course_id == course.id
+        ).distinct().count()
+        
+        remaining_spots = total_capacity - enrolled_students
+        enrollment_rate = (enrolled_students / total_capacity * 100) if total_capacity > 0 else 0
+        
+        course_stats.append({
+            'course_code': course.course_code,
+            'course_name': course.course_name,
+            'enrolled': enrolled_students,
+            'capacity': total_capacity,
+            'remaining': remaining_spots,
+            'enrollment_rate': round(enrollment_rate, 1),
+            'department': course.department
+        })
+
+    # 2. Department-wise Statistics
+    dept_stats = {}
+    for stat in course_stats:
+        dept = stat['department']
+        if dept not in dept_stats:
+            dept_stats[dept] = {
+                'total_courses': 0,
+                'total_enrolled': 0,
+                'total_capacity': 0,
+                'avg_enrollment_rate': 0
+            }
+        dept_stats[dept]['total_courses'] += 1
+        dept_stats[dept]['total_enrolled'] += stat['enrolled']
+        dept_stats[dept]['total_capacity'] += stat['capacity']
+    
+    # Calculate average enrollment rates
+    for dept in dept_stats:
+        if dept_stats[dept]['total_capacity'] > 0:
+            dept_stats[dept]['avg_enrollment_rate'] = round(
+                dept_stats[dept]['total_enrolled'] / dept_stats[dept]['total_capacity'] * 100, 1
+            )
+
+    # 3. Student Registration Trends by Department
+    student_dept_count = db.session.query(
+        Student.department, 
+        db.func.count(Student.id).label('count')
+    ).group_by(Student.department).all()
+
+    # 4. Credit Distribution Analysis
+    credit_distribution = db.session.query(
+        Course.credits,
+        db.func.count(Course.id).label('course_count')
+    ).filter_by(semester=open_semester).group_by(Course.credits).all()
+
+    # 5. Top Popular Courses (by enrollment rate)
+    popular_courses = sorted(course_stats, key=lambda x: x['enrollment_rate'], reverse=True)[:10]
+
+    # 6. Underenrolled Courses (enrollment rate < 50%)
+    underenrolled_courses = [course for course in course_stats if course['enrollment_rate'] < 50]
+
+    # 7. Instructor Workload
+    instructor_workload = db.session.query(
+        Instructor.name,
+        Instructor.department,
+        db.func.count(Section.id).label('section_count'),
+        db.func.sum(Section.quota).label('total_capacity')
+    ).join(Section).group_by(Instructor.id).all()
+
+    # 8. Time Slot Analysis
+    time_slot_usage = db.session.query(
+        Section.day,
+        Section.start_time,
+        db.func.count(Section.id).label('section_count')
+    ).join(Course).filter(Course.semester == open_semester).group_by(
+        Section.day, Section.start_time
+    ).order_by(Section.day, Section.start_time).all()
+
+    # 9. Student Credit Load Analysis
+    student_credit_loads = []
+    students = Student.query.all()
+    for student in students:
+        # Calculate current semester credits
+        current_enrollments = Enrollment.query.join(Section).join(Course).filter(
+            Enrollment.student_id == student.id,
+            Course.semester == open_semester
+        ).all()
+        
+        # Avoid double counting same course
+        seen_course_ids = set()
+        total_credits = 0
+        for enrollment in current_enrollments:
+            course = enrollment.section.course
+            if course.id not in seen_course_ids:
+                total_credits += course.credits
+                seen_course_ids.add(course.id)
+        
+        if total_credits > 0:  # Only include students with enrollments
+            student_credit_loads.append({
+                'student_name': student.name,
+                'department': student.department,
+                'credits': total_credits,
+                'scholarship': student.scholarship_percentage or 0
+            })
+
+    # Group credit loads by range
+    credit_ranges = {'0-6': 0, '7-12': 0, '13-18': 0, '19-24': 0, '25+': 0}
+    for load in student_credit_loads:
+        credits = load['credits']
+        if credits <= 6:
+            credit_ranges['0-6'] += 1
+        elif credits <= 12:
+            credit_ranges['7-12'] += 1
+        elif credits <= 18:
+            credit_ranges['13-18'] += 1
+        elif credits <= 24:
+            credit_ranges['19-24'] += 1
+        else:
+            credit_ranges['25+'] += 1
+
+    return render_template("admin/reports.html",
+        open_semester=open_semester,
+        course_stats=course_stats,
+        dept_stats=dept_stats,
+        student_dept_count=student_dept_count,
+        credit_distribution=credit_distribution,
+        popular_courses=popular_courses,
+        underenrolled_courses=underenrolled_courses,
+        instructor_workload=instructor_workload,
+        time_slot_usage=time_slot_usage,
+        student_credit_loads=student_credit_loads,
+        credit_ranges=credit_ranges,
+        generated_on=datetime.now().strftime("%B %d, %Y, %I:%M %p")  # 👈 加这行
+    )

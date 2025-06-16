@@ -60,23 +60,24 @@
     </div>
   </div>
 
-  <!-- ❌ Locked Courses -->
-  <div class="card shadow-sm rounded-3 mb-4">
-    <div class="card-header bg-danger bg-gradient text-white fw-semibold">
-      ❌ Locked Courses ({{ locked_courses|length }})
-    </div>
-    <div class="card-body p-0">
-      {% if locked_courses %}
-      <table class="table table-hover mb-0">
-        <thead class="table-light">
-           <tr>
-            <th>Code</th>
-            <th>Name & Description</th>
-            <th>Credits</th>
-          </tr>
-        </thead>
-        <tbody>
-        {% for course in eligible_courses %}
+<!-- ❌ Locked Courses -->
+<div class="card shadow-sm rounded-3 mb-4">
+  <div class="card-header bg-danger bg-gradient text-white fw-semibold">
+    ❌ Locked Courses ({{ locked_courses|length }})
+  </div>
+  <div class="card-body p-0">
+    {% if locked_courses %}
+    <table class="table table-hover mb-0">
+      <thead class="table-light">
+        <tr>
+          <th>Code</th>
+          <th>Name & Description</th>
+          <th>Credits</th>
+          <th>Reason</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for course, reason in locked_courses %}
         <tr>
           <td class="fw-semibold">{{ course.course_code }}</td>
           <td>
@@ -84,16 +85,17 @@
             <small class="text-muted">{{ course.description }}</small>
           </td>
           <td><span class="badge bg-secondary">{{ course.credits }}</span></td>
-    
+          <td class="text-danger">{{ reason }}</td>
         </tr>
         {% endfor %}
       </tbody>
-      </table>
-      {% else %}
-      <div class="p-3 text-muted">No locked courses.</div>
-      {% endif %}
-    </div>
+    </table>
+    {% else %}
+    <div class="p-3 text-muted">No locked courses.</div>
+    {% endif %}
   </div>
+</div>
+
 
   <!-- ✔ Completed Courses -->
   <div class="card shadow-sm rounded-3 mb-4">

@@ -1,0 +1,448 @@
+    {% extends "base.html" %}
+    {% block title %}Admin Reports{% endblock %}
+
+    {% block head %}
+    {{ super() }}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin-bottom: 30px;
+        }
+        .stats-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .stats-card h4 {
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        .stats-card .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .metric-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-left: 4px solid #007bff;
+        }
+        .table-container {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .progress-bar-custom {
+            height: 8px;
+            border-radius: 4px;
+        }
+        .enrollment-rate-high { background-color: #28a745; }
+        .enrollment-rate-medium { background-color: #ffc107; }
+        .enrollment-rate-low { background-color: #dc3545; }
+        
+        .department-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        .dept-CS { background-color: #e3f2fd; color: #1976d2; }
+        .dept-EE { background-color: #fff3e0; color: #f57c00; }
+        .dept-ME { background-color: #e8f5e8; color: #388e3c; }
+        .dept-CE { background-color: #fce4ec; color: #c2185b; }
+        .dept-default { background-color: #f5f5f5; color: #666; }
+    </style>
+    {% endblock %}
+
+    {% block content %}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">📊 Admin Reports & Analytics</h2>
+        <div>
+            <button onclick="window.print()" class="btn btn-outline-secondary btn-sm me-2">🖨️ Print Report</button>
+            <a href="{{ url_for('admin.admin_dashboard') }}" class="btn btn-outline-primary btn-sm">⬅️ Back to Dashboard</a>
+        </div>
+    </div>
+
+    <p class="text-muted mb-4">
+        📅 Report Period: <strong>{{ open_semester }}</strong> |
+        Generated on: <strong>{{ generated_on }}</strong>
+    </p>
+
+
+
+    <!-- Summary Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="stats-card text-center">
+                <h4>📚 Total Courses</h4>
+                <div class="stat-number">{{ course_stats|length }}</div>
+                <small>Active Courses</small>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card text-center">
+                <h4>👥 Total Enrolled</h4>
+                <div class="stat-number">{{ course_stats|sum(attribute='enrolled') }}</div>
+                <small>Students Registered</small>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card text-center">
+                <h4>🎯 Total Capacity</h4>
+                <div class="stat-number">{{ course_stats|sum(attribute='capacity') }}</div>
+                <small>Available Spots</small>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card text-center">
+                <h4>📈 Avg. Enrollment</h4>
+                <div class="stat-number">{{ ((course_stats|sum(attribute='enrolled') / course_stats|sum(attribute='capacity')) * 100)|round(1) }}%</div>
+                <small>Overall Rate</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row mb-4">
+        <!-- Enrollment vs Capacity Chart -->
+        <div class="col-md-6">
+            <div class="metric-card">
+                <h5>📊 Enrollment vs Capacity Trends</h5>
+                <div class="chart-container">
+                    <canvas id="enrollmentChart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Department Distribution -->
+        <div class="col-md-6">
+            <div class="metric-card">
+                <h5>🏛️ Department Distribution</h5>
+                <div class="chart-container">
+                    <canvas id="departmentChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <!-- Credit Distribution -->
+        <div class="col-md-6">
+            <div class="metric-card">
+                <h5>💳 Course Credit Distribution</h5>
+                <div class="chart-container">
+                    <canvas id="creditChart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Student Credit Load -->
+        <div class="col-md-6">
+            <div class="metric-card">
+                <h5>🎒 Student Credit Load Distribution</h5>
+                <div class="chart-container">
+                    <canvas id="studentLoadChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Popular Courses -->
+    <div class="table-container">
+        <h5>🔥 Top 10 Most Popular Courses</h5>
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Rank</th>
+                        <th>Course Code</th>
+                        <th>Course Name</th>
+                        <th>Department</th>
+                        <th>Enrolled/Capacity</th>
+                        <th>Enrollment Rate</th>
+                        <th>Progress</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for course in popular_courses %}
+                    <tr>
+                        <td><span class="badge bg-primary">{{ loop.index }}</span></td>
+                        <td><strong>{{ course.course_code }}</strong></td>
+                        <td>{{ course.course_name }}</td>
+                        <td><span class="department-badge dept-{{ course.department }}">{{ course.department }}</span></td>
+                        <td>{{ course.enrolled }}/{{ course.capacity }}</td>
+                        <td><strong>{{ course.enrollment_rate }}%</strong></td>
+                        <td>
+                            <div class="progress progress-bar-custom">
+                                <div class="progress-bar 
+                                    {% if course.enrollment_rate >= 80 %}enrollment-rate-high
+                                    {% elif course.enrollment_rate >= 50 %}enrollment-rate-medium
+                                    {% else %}enrollment-rate-low{% endif %}" 
+                                    style="width: {{ course.enrollment_rate }}%"></div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Underenrolled Courses -->
+    {% if underenrolled_courses %}
+    <div class="table-container">
+        <h5>⚠️ Underenrolled Courses (< 50% Capacity)</h5>
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-warning">
+                    <tr>
+                        <th>Course Code</th>
+                        <th>Course Name</th>
+                        <th>Department</th>
+                        <th>Enrolled/Capacity</th>
+                        <th>Enrollment Rate</th>
+                        <th>Remaining Spots</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for course in underenrolled_courses %}
+                    <tr>
+                        <td><strong>{{ course.course_code }}</strong></td>
+                        <td>{{ course.course_name }}</td>
+                        <td><span class="department-badge dept-{{ course.department }}">{{ course.department }}</span></td>
+                        <td>{{ course.enrolled }}/{{ course.capacity }}</td>
+                        <td><span class="badge bg-warning">{{ course.enrollment_rate }}%</span></td>
+                        <td><span class="badge bg-info">{{ course.remaining }}</span></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Department Statistics -->
+    <div class="table-container">
+        <h5>🏛️ Department-wise Statistics</h5>
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-info">
+                    <tr>
+                        <th>Department</th>
+                        <th>Total Courses</th>
+                        <th>Total Enrolled</th>
+                        <th>Total Capacity</th>
+                        <th>Avg. Enrollment Rate</th>
+                        <th>Performance</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for dept, stats in dept_stats.items() %}
+                    <tr>
+                        <td><span class="department-badge dept-{{ dept }}">{{ dept }}</span></td>
+                        <td>{{ stats.total_courses }}</td>
+                        <td>{{ stats.total_enrolled }}</td>
+                        <td>{{ stats.total_capacity }}</td>
+                        <td><strong>{{ stats.avg_enrollment_rate }}%</strong></td>
+                        <td>
+                            <div class="progress progress-bar-custom">
+                                <div class="progress-bar 
+                                    {% if stats.avg_enrollment_rate >= 80 %}enrollment-rate-high
+                                    {% elif stats.avg_enrollment_rate >= 50 %}enrollment-rate-medium
+                                    {% else %}enrollment-rate-low{% endif %}" 
+                                    style="width: {{ stats.avg_enrollment_rate }}%"></div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Instructor Workload -->
+    <div class="table-container">
+        <h5>👨‍🏫 Instructor Workload Analysis</h5>
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-success">
+                    <tr>
+                        <th>Instructor Name</th>
+                        <th>Department</th>
+                        <th>Sections Teaching</th>
+                        <th>Total Student Capacity</th>
+                        <th>Workload Level</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for instructor in instructor_workload %}
+                    <tr>
+                        <td><strong>{{ instructor.name }}</strong></td>
+                        <td><span class="department-badge dept-{{ instructor.department }}">{{ instructor.department }}</span></td>
+                        <td>{{ instructor.section_count }}</td>
+                        <td>{{ instructor.total_capacity }}</td>
+                        <td>
+                            {% if instructor.section_count >= 4 %}
+                                <span class="badge bg-danger">High</span>
+                            {% elif instructor.section_count >= 2 %}
+                                <span class="badge bg-warning">Medium</span>
+                            {% else %}
+                                <span class="badge bg-success">Light</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Time Slot Usage -->
+    <div class="table-container">
+        <h5>⏰ Time Slot Usage Analysis</h5>
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-secondary">
+                    <tr>
+                        <th>Day</th>
+                        <th>Time Slot</th>
+                        <th>Number of Sections</th>
+                        <th>Usage Level</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for slot in time_slot_usage %}
+                    <tr>
+                        <td><strong>{{ slot.day }}</strong></td>
+                        <td>{{ slot.start_time }}</td>
+                        <td>{{ slot.section_count }}</td>
+                        <td>
+                            {% if slot.section_count >= 5 %}
+                                <span class="badge bg-danger">Congested</span>
+                            {% elif slot.section_count >= 3 %}
+                                <span class="badge bg-warning">Busy</span>
+                            {% else %}
+                                <span class="badge bg-success">Available</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+    // Enrollment vs Capacity Chart
+    const enrollmentCtx = document.getElementById('enrollmentChart').getContext('2d');
+    new Chart(enrollmentCtx, {
+        type: 'bar',
+        data: {
+            labels: {{ course_stats[:10] | map(attribute='course_code') | list | tojson }},
+            datasets: [
+                {
+                    label: 'Enrolled',
+                    data: {{ course_stats[:10] | map(attribute='enrolled') | list | tojson }},
+                    backgroundColor: 'rgba(54, 162, 235, 0.8)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Capacity',
+                    data: {{ course_stats[:10] | map(attribute='capacity') | list | tojson }},
+                    backgroundColor: 'rgba(255, 99, 132, 0.8)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 1
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: { beginAtZero: true }
+            }
+        }
+    });
+
+    // Department Distribution Chart
+    const departmentCtx = document.getElementById('departmentChart').getContext('2d');
+    new Chart(departmentCtx, {
+        type: 'pie',
+        data: {
+            labels: {{ student_dept_count | map(attribute=0) | list | tojson }},
+            datasets: [{
+                data: {{ student_dept_count | map(attribute=1) | list | tojson }},
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.8)',
+                    'rgba(54, 162, 235, 0.8)',
+                    'rgba(255, 205, 86, 0.8)',
+                    'rgba(75, 192, 192, 0.8)',
+                    'rgba(153, 102, 255, 0.8)'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+
+    // Credit Distribution Chart
+    const creditCtx = document.getElementById('creditChart').getContext('2d');
+    new Chart(creditCtx, {
+        type: 'doughnut',
+        data: {
+            labels: {{ credit_distribution | map(attribute=0) | map('string') | list | tojson }},
+            datasets: [{
+                data: {{ credit_distribution | map(attribute=1) | list | tojson }},
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.8)',
+                    'rgba(54, 162, 235, 0.8)',
+                    'rgba(255, 205, 86, 0.8)',
+                    'rgba(75, 192, 192, 0.8)'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+
+    // Student Credit Load Chart
+    const studentLoadCtx = document.getElementById('studentLoadChart').getContext('2d');
+    new Chart(studentLoadCtx, {
+        type: 'bar',
+        data: {
+            labels: {{ credit_ranges.keys() | list | tojson }},
+            datasets: [{
+                label: 'Number of Students',
+                data: {{ credit_ranges.values() | list | tojson }},
+                backgroundColor: 'rgba(75, 192, 192, 0.8)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: { beginAtZero: true }
+            }
+        }
+    });
+    </script>
+
+
+    {% endblock %}

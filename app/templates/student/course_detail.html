@@ -24,7 +24,7 @@
         {% for section in lectures %}
         <tr>
             <td>{{ section.name }}</td>
-            <td>{{ section.instructor }}</td>
+            <td>{{ section.instructor.name }}</td>
             <td>{{ section.day }}</td>
             <td>
                 {{ section.start_time.strftime('%H:%M') if section.start_time else '—' }}

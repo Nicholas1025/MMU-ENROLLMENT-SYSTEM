@@ -36,7 +36,7 @@
                 </td>
                 <td>{{ section.name }}</td>
                 <td>{{ section.type }}</td>
-                <td>{{ section.instructor }}</td>
+                <td>{{ section.instructor.name }}</td>
                 <td>{{ section.day }}</td>
                 <td>
                     {{ section.start_time.strftime('%H:%M') if section.start_time else '—' }}

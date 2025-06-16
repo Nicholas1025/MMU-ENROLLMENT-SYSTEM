@@ -3,7 +3,7 @@
 {% block content %}
 <h2>{{ section.course.course_code }} - {{ section.course.course_name }}</h2>
 <h4>Section: {{ section.name }} ({{ section.type }})</h4>
-<p><strong>Instructor:</strong> {{ section.instructor }}</p>
+<p><strong>Instructor:</strong> {{ section.name }}</p>
 <p><strong>Time:</strong> {{ section.day }} {{ section.start_time.strftime('%H:%M') }} - {{ section.end_time.strftime('%H:%M') }}</p>
 
 <table class="table table-bordered mt-3">

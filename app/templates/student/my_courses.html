@@ -22,7 +22,7 @@
             <td>{{ s.course.course_code }} - {{ s.course.course_name }}</td>
             <td>{{ s.name }}</td>
             <td>{{ s.type }}</td>
-            <td>{{ s.instructor }}</td>
+            <td>{{ s.instructor.name }}</td>
             <td>{{ s.day }}</td>
             <td>{{ s.start_time.strftime('%H:%M') }} - {{ s.end_time.strftime('%H:%M') }}</td>
             <td>{{ s.location }}</td>
