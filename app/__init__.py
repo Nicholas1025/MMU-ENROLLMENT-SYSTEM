@@ -4,7 +4,6 @@ from flask_wtf import CSRFProtect
 from flask_login import LoginManager
 from .models import db, Admin, Student, Instructor
 
-# ✅ 导入各个蓝图
 from .routes.student import student_bp
 from .routes.admin import admin_bp
 from .routes.shared import shared
@@ -21,9 +20,8 @@ def create_app():
 
     login_manager = LoginManager()
     login_manager.init_app(app)
-    login_manager.login_view = "shared.login"  # 默认学生登录页面
+    login_manager.login_view = "shared.login"  
 
-    # ✅ 多角色支持：根据 session["role"] 来判断从哪个表加载用户
     @login_manager.user_loader
     def load_user(user_id):
         if user_id.startswith("student-"):
@@ -43,13 +41,11 @@ def create_app():
             return redirect(url_for("instructor.login"))
         return redirect(url_for("shared.login"))
 
-    # ✅ 注册蓝图
     app.register_blueprint(shared)
     app.register_blueprint(student_bp)
     app.register_blueprint(admin_bp)
     app.register_blueprint(instructor_bp)
 
-    # ✅ 初始化数据库并创建初始管理员
     with app.app_context():
         db.create_all()
         if not Admin.query.first():

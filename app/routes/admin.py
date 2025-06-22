@@ -45,7 +45,6 @@ def admin_dashboard():
         flash("Course added!", "success")
         return redirect(url_for("admin.admin_dashboard"))
 
-    # 当前开放学期
     setting = SystemSetting.query.filter_by(key="open_semester").first()
     open_semester = setting.value if setting else "Not Set"
 
@@ -93,7 +92,6 @@ def admin_edit(course_id):
             flash("Course code already exists.", "danger")
             return redirect(url_for("admin.admin_dashboard"))
 
-        # ✅ 先直接更新所有字段，包括 prerequisite_id
         course.course_code = form.course_code.data
         course.course_name = form.course_name.data
         course.credits = form.credits.data
@@ -101,7 +99,6 @@ def admin_edit(course_id):
         course.department = form.department.data
         course.description = form.description.data
         
-        # ✅ 这里是正确保存 prerequisite
         if form.prerequisite_id.data == 0:
             course.prerequisite_id = None
         else:
@@ -151,7 +148,7 @@ def import_sample_data():
     db.session.commit()
 
         # === Import Instructors ===
-    from ..models import Instructor  # 确保导入了 Instructor 模型
+    from ..models import Instructor  
 
     for i in data.get("instructors", []):
         if not Instructor.query.filter_by(email=i["email"]).first():
@@ -262,7 +259,7 @@ def admin_add_section():
              course_id=form.course_id.data,
              name=form.name.data,
              type=form.type.data,
-             instructor=form.instructor.data,
+             instructor_id=form.instructor.data,
              location=form.location.data,
              day=form.day_of_week.data,
              start_time=form.start_time.data,
@@ -290,13 +287,13 @@ def admin_edit_section(section_id):
     form.instructor.choices = [(i.id, f"{i.title or ''} {i.name}") for i in Instructor.query.all()]
 
     form.course_id.data = section.course_id
-    form.instructor.data = section.instructor_id  # ✅ 设定默认值
+    form.instructor.data = section.instructor_id  
 
     if form.validate_on_submit():
         section.course_id = form.course_id.data
         section.name = form.name.data
         section.type = form.type.data
-        section.instructor_id = form.instructor.data  # ✅ 正确存 instructor_id
+        section.instructor_id = form.instructor.data  
         section.location = form.location.data
         section.day = form.day_of_week.data
         section.start_time = form.start_time.data
@@ -361,11 +358,8 @@ def finalize_enrollment(course_id):
     tutorial_id = request.form.get("tutorial_id", type=int)
     student_id = current_user.id
 
-    # 获取当前选的课程
     course = Course.query.get_or_404(course_id)
 
-    # ✅ 重复注册检测
-# ✅ 是否已注册该课程（无论哪个 section）
     existing_course = Enrollment.query.join(Section).filter(
         Enrollment.student_id == student_id,
         Section.course_id == course_id
@@ -375,7 +369,6 @@ def finalize_enrollment(course_id):
         return redirect(url_for("student.dashboard"))
 
 
-    # ✅ prerequisite 检查
     prereq = course.prerequisite
     if prereq:
         completed_course_ids = [
@@ -386,7 +379,6 @@ def finalize_enrollment(course_id):
             return redirect(url_for("student.dashboard"))
 
 
-    # ✅ 学分上限检查（20 学分）
     current_credits = sum(
         e.section.course.credits for e in Enrollment.query.filter_by(student_id=student_id).all()
     )
@@ -394,11 +386,9 @@ def finalize_enrollment(course_id):
         flash(f"Cannot register: Credit limit exceeded. You already have {current_credits} credits.", "danger")
         return redirect(url_for("student.dashboard"))
 
-    # 获取两个 section 对象
     lecture = Section.query.get_or_404(lecture_id)
     tutorial = Section.query.get_or_404(tutorial_id)
 
-    # ✅ 时间冲突检测
     enrolled_sections = Enrollment.query.filter_by(student_id=student_id).all()
     for e in enrolled_sections:
         existing_sec = Section.query.get(e.section_id)
@@ -411,7 +401,6 @@ def finalize_enrollment(course_id):
                 flash(f"Time conflict with {existing_sec.name} (Tutorial)", "danger")
                 return redirect(url_for("student.dashboard"))
 
-    # ✅ 正式注册
     db.session.add(Enrollment(student_id=student_id, section_id=lecture.id))
     db.session.add(Enrollment(student_id=student_id, section_id=tutorial.id))
     db.session.commit()
@@ -435,7 +424,6 @@ def change_section(section_id):
     section = Section.query.get_or_404(section_id)
     student_id = current_user.id
 
-    # 删除该课程下旧 Section
     old_enrollments = Enrollment.query.join(Section).filter(
         Enrollment.student_id == student_id,
         Section.course_id == section.course_id,
@@ -444,7 +432,6 @@ def change_section(section_id):
     for e in old_enrollments:
         db.session.delete(e)
 
-    # 添加新的 Section
     db.session.add(Enrollment(student_id=student_id, section_id=section.id))
     db.session.commit()
     flash(f"{section.name} updated successfully!", "success")
@@ -459,7 +446,6 @@ def admin_settings():
 
     form = SemesterSettingForm()
 
-    # 自动从数据库读取所有不同的学期作为选项
     all_semesters = db.session.query(Course.semester).distinct().all()
     form.semester.choices = [(s[0], s[0]) for s in all_semesters]
 
@@ -534,7 +520,6 @@ def admin_edit_instructor(id):
         if form.password.data:
             instructor.set_password(form.password.data)
 
-        # 处理头像
         if form.profile_pic.data:
             filename = secure_filename(form.profile_pic.data.filename)
             unique_filename = f"{uuid.uuid4().hex}_{filename}"
@@ -557,7 +542,6 @@ def admin_instructor_list():
     instructors = Instructor.query.all()
     return render_template("admin/instructor_list.html", instructors=instructors)
 
-# Add this to your admin_bp routes in the admin blueprint file
 
 @admin_bp.route("/admin/reports")
 @login_required

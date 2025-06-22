@@ -104,7 +104,6 @@ class Section(db.Model):
     course = db.relationship("Course", back_populates="sections")
     enrollments = db.relationship("Enrollment", back_populates="section", cascade="all, delete")
 
-# 放在 models.py 最后
 class SystemSetting(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     key = db.Column(db.String(64), unique=True, nullable=False)
@@ -116,12 +115,12 @@ class Instructor(UserMixin, db.Model):
     email = db.Column(db.String(128), unique=True, nullable=False)
     password_hash = db.Column(db.String(128))
 
-    title = db.Column(db.String(64))         # 职称，例如 Lecturer
-    department = db.Column(db.String(128))   # 部门，例如 FIST
-    office = db.Column(db.String(128))       # 办公地址
-    phone = db.Column(db.String(32))         # 电话
-    biography = db.Column(db.Text)           # 个人简介
-    profile_pic = db.Column(db.String(128))  # 头像路径
+    title = db.Column(db.String(64))         
+    department = db.Column(db.String(128))   
+    office = db.Column(db.String(128))      
+    phone = db.Column(db.String(32))        
+    biography = db.Column(db.Text)          
+    profile_pic = db.Column(db.String(128))  
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
